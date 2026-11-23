@@ -37,7 +37,7 @@ $runtime = @(
     'data\flutter_assets\assets\brand\logo-horizontal.png', 'data\flutter_assets\assets\brand\logo-compact.png',
     'data\flutter_assets\assets\brand\emblem.png', 'data\flutter_assets\assets\brand\symbol.png',
     'data\flutter_assets\shaders\ink_sparkle.frag', 'data\flutter_assets\shaders\stretch_effect.frag',
-    'LICENSE', 'LEIA-ME.md', 'licenses\Dart.txt', 'licenses\Flutter.txt', 'licenses\Flutter-Engine.txt',
+    'LICENSE', 'MARCA.md', 'LEIA-ME.md', 'licenses\Dart.txt', 'licenses\Flutter.txt', 'licenses\Flutter-Engine.txt',
     'licenses\Flutter-Windows.md', 'licenses\SameBoy.txt', 'licenses\Libretro.txt',
     'licenses\CREDITOS.md', 'licenses\MaterialIcons.txt', 'licenses\CupertinoIcons.txt',
     'licenses\Flutter-template-images.txt'
@@ -47,9 +47,11 @@ $available = @(Get-ChildItem -LiteralPath $bundle -Recurse -Force -File | ForEac
 })
 $difference = Compare-Object $runtime $available
 if ($difference) { throw "Conteúdo inesperado ou ausente no portátil: $($difference.InputObject -join ', ')" }
-if ((Get-FileHash -LiteralPath (Join-Path $bundle 'LICENSE')).Hash -ne
-    (Get-FileHash -LiteralPath (Join-Path $repo 'LICENSE')).Hash) {
-    throw 'A licença do portátil diverge da licença do repositório.'
+foreach ($notice in 'LICENSE', 'MARCA.md') {
+    if ((Get-FileHash -LiteralPath (Join-Path $bundle $notice)).Hash -ne
+        (Get-FileHash -LiteralPath (Join-Path $repo $notice)).Hash) {
+        throw "O arquivo $notice do portátil diverge do repositório."
+    }
 }
 $files = [ordered]@{}
 foreach ($path in $runtime) { $files[$path] = Join-Path $bundle $path }

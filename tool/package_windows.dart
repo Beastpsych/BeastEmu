@@ -50,6 +50,7 @@ Future<void> main() async {
   }
   await copy(core.path, 'cores/windows/sameboy_libretro.dll');
   await copy('LICENSE', 'LICENSE');
+  await copy('MARCA.md', 'MARCA.md');
   await copy('docs/SameBoy-LICENSE.txt', 'licenses/SameBoy.txt');
   await copy('docs/Libretro-LICENSE.txt', 'licenses/Libretro.txt');
   await copy(

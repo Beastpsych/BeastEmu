@@ -36,7 +36,7 @@ O executável e a janela usam o ícone do aplicativo incorporado ao programa. O 
 
 ## Conteúdo e licenças
 
-O diretório `licenses` contém a licença Expat do SameBoy, os avisos BSD de Flutter e Dart, os avisos do engine Windows e o texto de licença das fontes Material Icons. O Flutter gera `data\flutter_assets\NOTICES.Z` com os créditos dos pacotes e recursos de terceiros, incluindo Cupertino Icons. O instalador usa Inno Setup e inclui seu aviso de licença. O arquivo `LICENSE` na pasta de instalação contém a licença MIT do código autoral do BeastEmu.
+O diretório `licenses` contém a licença Expat do SameBoy, os avisos BSD de Flutter e Dart, os avisos do engine Windows e o texto de licença das fontes Material Icons. O Flutter gera `data\flutter_assets\NOTICES.Z` com os créditos dos pacotes e recursos de terceiros, incluindo Cupertino Icons. O instalador usa Inno Setup e inclui seu aviso de licença. O arquivo `LICENSE` na pasta de instalação contém a licença MIT do código autoral do BeastEmu. Ao seu lado, `MARCA.md` descreve as permissões de uso do nome, do emblema, do logotipo e dos ícones.
 
 O instalador é distribuído sem assinatura Authenticode. O SmartScreen pode exibir um aviso de aplicativo desconhecido. Confira a origem e o SHA-256 antes de executá-lo. O hash permite comparar o arquivo com a cópia indicada pelo mantenedor.
 

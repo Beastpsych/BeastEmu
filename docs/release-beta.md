@@ -1,6 +1,6 @@
 # BeastEmu para Windows x64 · notas da primeira beta
 
-Rascunho para revisão do proprietário. Os arquivos avaliados abaixo identificam-se como **0.1.1-beta.1+3**.
+Pré-lançamento **v0.1.1-beta.1** para Windows x64. Os pacotes identificam-se como **0.1.1-beta.1+3** (versão numérica **0.1.1.3**).
 
 O BeastEmu é um emulador gratuito de Game Boy e Game Boy Color com interface em português. Importe seus próprios arquivos GB/GBC, organize a biblioteca por favoritos ou jogos recentes e escolha **Jogar**. As capas podem ser escolhidas no computador. Os pacotes não contêm jogos.
 
@@ -21,9 +21,9 @@ Feche a sessão por **Sair** e encerre o aplicativo antes de atualizar sobre uma
 
 | Arquivo | SHA-256 |
 |---|---|
-| `BeastEmu-0.1.1-beta.1+3-Windows-x64-Setup.exe` | `CC90800526B38014AD820A9BDCCA4F409C715886066F4520F6339C55174C12AE` |
-| `BeastEmu-0.1.1-beta.1+3-Windows-x64-Portable.zip` | `94AE1D5193BE338F791DF96CAFD7A5B9707672121EF6B85F60A9753D8764AC09` |
+| `BeastEmu-0.1.1-beta.1+3-Windows-x64-Setup.exe` | `15CA361A38B7CDC9FDA83DB95B2C7B1C88ABC780D8A050BDAB7ED8DB97ECF06C` |
+| `BeastEmu-0.1.1-beta.1+3-Windows-x64-Portable.zip` | `137DDDF11EBAB2AD817D31CCD1F8462366A45809EF2DB2F8E369DEF831ECF85B` |
 
 Confira o download com `Get-FileHash -Algorithm SHA256 -LiteralPath <arquivo>`. O arquivo `SHA256SUMS.txt` contém as duas somas. Uma nova compilação, assinatura ou alteração de versão exige a substituição destes valores pelos hashes dos arquivos efetivamente publicados.
 
-O proprietário relatou testes manuais bem-sucedidos do candidato anterior em dois PCs Windows. A atualização RC2 → beta tem um [roteiro próprio](validacao-rc2.md). Os testes de desenvolvimento usam ROMs sintéticas. O código autoral do BeastEmu é distribuído sob MIT, com o aviso `Copyright (c) 2026 Beast`. A origem do emblema e do logotipo e as permissões pendentes para redistribuição das artes estão no [guia da marca](../design/README.md). A emulação utiliza o núcleo SameBoy com integração Libretro e a interface utiliza Flutter e Dart. [Licença do projeto](../LICENSE) · [Créditos e avisos de terceiros](terceiros.md) · [Histórico de alterações](../CHANGELOG.md)
+O proprietário relatou testes manuais bem-sucedidos do candidato anterior em dois PCs Windows. O proprietário também confirmou o ciclo de instalação, atualização, desinstalação e reinstalação antes do reempacotamento com a política da marca. [Roteiro de atualização RC2 → beta](validacao-rc2.md). Os testes de desenvolvimento usam ROMs sintéticas. O código autoral do BeastEmu é distribuído sob MIT, com o aviso `Copyright (c) 2026 Beast`. A [política da marca](../MARCA.md) permite redistribuir os pacotes oficiais inalterados com os avisos. A origem das artes está no [guia de identidade](../design/README.md). A emulação utiliza o núcleo SameBoy com integração Libretro e a interface utiliza Flutter e Dart. [Licença do projeto](../LICENSE) · [Créditos e avisos de terceiros](terceiros.md) · [Histórico de alterações](../CHANGELOG.md)

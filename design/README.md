@@ -2,7 +2,7 @@
 
 ![Logotipo BeastEmu](../assets/brand/logo-horizontal.png)
 
-O emblema dracônico e o logotipo BeastEmu foram criados por geração de imagens no ChatGPT, sob a direção visual aprovada pelo responsável pelo projeto. As referências foram adaptadas para a interface, os ícones do Windows e o instalador. A licença MIT cobre o código autoral. As condições de reutilização e redistribuição da marca, do lettering, das pranchas e das exportações ainda dependem de definição pelo responsável. Este registro de origem não afirma exclusividade nem concede uma licença de arte.
+O emblema dracônico e o logotipo BeastEmu foram criados por geração de imagens no ChatGPT, sob a direção visual aprovada pelo responsável pelo projeto. As referências foram adaptadas para a interface, os ícones do Windows e o instalador. A [política da marca](../MARCA.md) identifica os arquivos e autoriza o estudo, a compilação e a redistribuição de versões oficiais inalteradas com os avisos. O código autoral permanece sob MIT.
 
 As duas referências aprovadas estão em `references/`, com a extensão dupla `.png.png` fornecida. O emblema frontal detalhado e o perfil de dragão da prancha são duas aplicações distintas da marca. A prancha original mede 1536 × 1024 e o emblema original, 1254 × 1254.
 

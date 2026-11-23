@@ -1,5 +1,7 @@
 # Testar a atualização do RC2 para a primeira beta
 
+O proprietário confirmou que a instalação, a atualização, a desinstalação e a reinstalação passaram em teste externo. O roteiro abaixo documenta como repetir o ensaio.
+
 Use uma VM ou conta Windows x64 descartável. Registre a edição do Windows, a versão de origem `0.1.0-beta.rc.2+2`, a versão de destino `0.1.1-beta.1+3` e o SHA-256 dos dois instaladores. Trabalhe com cartuchos sintéticos e dados de teste. O teste automatizado de instalação precisa de um perfil vazio.
 
 1. Instale o RC2, abra pelo menu Iniciar e importe uma ROM sintética com bateria e relógio. Configure capa, favorito, volume, teclado e XInput. Gere progresso no cartucho, um estado manual e um rápido. Se testar Link Cable, gere progresso separado para J1 e J2.

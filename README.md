@@ -2,7 +2,7 @@
 
 <img src="assets/brand/logo-horizontal.png" width="333" alt="BeastEmu · Beast Edition">
 
-Emulador de Game Boy e Game Boy Color para Windows x64, com interface Beast Edition em português e núcleo SameBoy Libretro. Primeira beta para Windows: **0.1.1-beta.1**, build 3.
+Emulador de Game Boy e Game Boy Color para Windows x64, com interface Beast Edition em português e núcleo SameBoy Libretro. Primeira beta para Windows: **v0.1.1-beta.1**, build 3.
 
 O BeastEmu organiza a biblioteca no próprio computador e reproduz áudio estéreo via XAudio2. Cada pessoa importa os cartuchos aos quais tem acesso legítimo. A distribuição não inclui jogos ou ROMs comerciais.
 
@@ -60,10 +60,10 @@ O portátil inclui os auxiliares compilados. A geração opcional do instalador 
 
 ## Compatibilidade, créditos e relatos de erro
 
-A distribuição tem como alvo Windows x64 e controles XInput. O portátil usa o perfil da conta para a biblioteca e os saves. Ao trocar de computador, faça backup também dos dados da conta. O instalador está sem assinatura Authenticode e o Windows SmartScreen pode exibir um aviso. Confira a origem e compare o SHA-256 do arquivo com o da distribuição. A origem dos recursos visuais e as condições pendentes de uso estão no [guia da marca](design/README.md). As notas da beta descrevem as limitações. O roteiro de validação está na [auditoria de publicação](docs/auditoria-publicacao.md). [Notas do candidato](docs/release-beta.md) · [Histórico de alterações](CHANGELOG.md)
+A distribuição tem como alvo Windows x64 e controles XInput. O portátil usa o perfil da conta para a biblioteca e os saves. Ao trocar de computador, faça backup também dos dados da conta. O instalador está sem assinatura Authenticode e o Windows SmartScreen pode exibir um aviso. Confira a origem e compare o SHA-256 do arquivo com o da distribuição. O proprietário confirmou o ciclo de instalação, atualização, desinstalação e reinstalação no Windows. As notas da beta descrevem as limitações. O roteiro de validação está na [auditoria de publicação](docs/auditoria-publicacao.md). [Notas da beta](docs/release-beta.md) · [Histórico de alterações](CHANGELOG.md)
 
 Ao relatar um problema, informe a versão exibida no BeastEmu, a versão do Windows, se usou o instalador ou o portátil, o modo de jogo e os passos para reproduzir. Descreva o resultado observado e o esperado. Para problemas de áudio ou controle, identifique o dispositivo. Prefira reproduzir com as ROMs sintéticas. Remova caminhos pessoais das mensagens e capturas e mantenha ROMs, saves e configurações privadas fora do relato. [Como contribuir](CONTRIBUTING.md)
 
 ## Licença
 
-O código autoral do BeastEmu sobre o qual Beast detém os direitos é distribuído sob a licença MIT. Copyright (c) 2026 Beast. Ao redistribuir cópias ou partes substanciais, inclua o aviso de copyright e o texto da licença. SameBoy, Libretro, Flutter, Dart, fontes, ícones e demais componentes de terceiros seguem suas próprias licenças. [Licença MIT do BeastEmu](LICENSE) · [Créditos e atribuições](docs/terceiros.md)
+O código autoral do BeastEmu sobre o qual Beast detém os direitos é distribuído sob a licença MIT. Copyright (c) 2026 Beast. Ao redistribuir cópias ou partes substanciais, inclua o aviso de copyright e o texto da licença. SameBoy, Libretro, Flutter, Dart, fontes, ícones e demais componentes de terceiros seguem suas próprias licenças. A identidade visual pode acompanhar versões oficiais inalteradas com os avisos preservados. [Política da marca](MARCA.md) · [Origem das artes](design/README.md) · [Licença MIT do BeastEmu](LICENSE) · [Créditos e atribuições](docs/terceiros.md)
