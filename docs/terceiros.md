@@ -1,0 +1,26 @@
+# Créditos e licenças da distribuição Windows
+
+Este inventário acompanha o instalador e o portátil. Os nomes de arquivo abaixo são relativos à pasta `licenses`. A versão dos pacotes Dart está fixada no `pubspec.lock` do candidato.
+
+| Componente distribuído | Origem e condições | Aviso incluído |
+|---|---|---|
+| SameBoy 1.0.5, revisão `90e2899` | Lior Halphon, Expat. Conservar copyright, permissão e isenção de garantia. O alvo usa o núcleo, o adaptador Libretro e os programas de inicialização do SameBoy. A condição adicional de iOS refere-se ao diretório iOS. | `SameBoy.txt` |
+| Cabeçalhos Libretro | The RetroArch team, licença MIT dos arquivos `libretro.h` e `retro_inline.h`. As definições `hardware.inc` usadas na montagem do boot do SameBoy são CC0-1.0. | `Libretro.txt` |
+| Flutter 3.47.9, engine Windows, runtime Dart 3.13.7 | Licenças BSD com condições de atribuição, além dos avisos próprios dos componentes incorporados, como ICU e Skia. Preservar os avisos integrais no binário distribuído e nas cópias do código correspondente. | `Flutter.txt`, `Flutter-Windows.md`, `Flutter-Engine.txt`, `Dart.txt` |
+| Bibliotecas Dart e DLL JNI | `file_picker` e a implementação Windows usam MIT. `ffi`, `crypto`, `path_provider`, `shared_preferences`, `win32` e `jni` usam BSD. O conjunto inclui componentes com Apache-2.0, como `material_color_utilities`. Preservar créditos, termos e avisos de modificação quando aplicáveis. | `data/flutter_assets/NOTICES.Z` na raiz da distribuição (texto compactado com gzip) |
+| Material Icons | A fonte contém o aviso Copyright 2019 Google LLC. A fonte distribuída é reduzida pelo build Flutter aos glifos usados. O arquivo de atribuição que acompanha a fonte no SDK usado contém CC BY 4.0. | `MaterialIcons.txt` |
+| Cupertino Icons 1.0.9 | Vladimir Kharlampidi, MIT, conforme a licença do pacote que fornece a fonte. | `CupertinoIcons.txt` |
+| Emblema, logotipos e ícones BeastEmu | Derivados das duas referências visuais aprovadas pelo proprietário. O lettering faz parte da arte rasterizada. Os créditos das fontes de interface estão nas linhas acima. | Originais e exportação documentados em `design/README.md` no repositório |
+| Auxiliares do BeastEmu e saída de áudio | Os dois executáveis SameBoy em `helpers` incorporam o runtime Dart. O código autoral dos auxiliares e da DLL `beastemu_audio.dll` acompanha o projeto em `tool` e `windows/runner`. | `LICENSE`, `Dart.txt` e avisos do runtime |
+| Inno Setup 7.1.1 | Jordan Russell e Martijn Laan. Manter os avisos de copyright e endereços presentes no instalador. O compilador é uma ferramenta de desenvolvimento. | `InnoSetup.txt` no instalador |
+| XAudio2, XInput, Win32 e runtime Visual C++ | As integrações do BeastEmu chamam APIs do Windows. O runtime VC++ x64 vem da Microsoft como pré-requisito separado. O pacote não inclui instalador Microsoft, SDKs ou DLLs XInput/XAudio2 avulsas. | [Redistribuição do Visual C++](https://learn.microsoft.com/cpp/windows/redistributing-visual-cpp-files) |
+
+O índice geral do Flutter inclui também pacotes de outras plataformas. Por exemplo, `dbus` 0.8.0 (Linux) tem MPL-2.0. Quem redistribuir código coberto em forma executável deve disponibilizar o fonte correspondente sob MPL e informar como obtê-lo. Os avisos agregados por si sós não identificam os componentes efetivamente ligados. O núcleo e os pacotes permissivos acima permitem distribuição binária com as atribuições aplicáveis. Essa permissão não define a licença do frontend. [Fonte da versão de dbus](https://pub.dev/packages/dbus/versions/0.8.0) · [MPL 2.0, seção 3](https://www.mozilla.org/MPL/2.0/)
+
+**Fontes correspondentes** — [SameBoy/Libretro](https://github.com/libretro/SameBoy/tree/90e2899) · [Flutter deste build](https://github.com/flutter/flutter/tree/c197ca5199e9ee5661e865596c9c07294dfab51c) · [Dart SDK](https://github.com/dart-lang/sdk/tree/3.13.7) · [Material Icons](https://fonts.google.com/icons) · [Flutter template images](https://pub.dev/packages/flutter_template_images/versions/5.0.0) · [Inno Setup](https://jrsoftware.org/files/is/license.txt)
+
+## Licença do código autoral
+
+O código autoral do BeastEmu para o qual Beast detém os direitos é distribuído sob MIT, com o aviso `Copyright (c) 2026 Beast`. O texto integral acompanha o repositório, o aplicativo instalado e o portátil no arquivo `LICENSE` da raiz. Os componentes da tabela conservam suas licenças e atribuições. [MIT](https://opensource.org/license/mit)
+
+O pacote mantém o aviso histórico `Flutter-template-images.txt` das versões que utilizavam o ícone padrão do Flutter. Nesta revisão, os ícones de programa e instalação são exportações da prancha BeastEmu. As capas importadas pertencem à biblioteca de cada usuário. O emblema dracônico e o logotipo BeastEmu foram criados por geração de imagens no ChatGPT, sob a direção visual aprovada pelo responsável pelo projeto. As referências foram adaptadas para a interface, os ícones do Windows e o instalador. A licença MIT cobre o código autoral. As condições de reutilização e redistribuição da marca, do lettering, das pranchas e das exportações ainda dependem de definição pelo responsável. Este registro de origem não afirma exclusividade nem concede uma licença de arte. Os cartuchos gerados para os testes locais usam código de demonstração e um campo de logotipo vazio.
