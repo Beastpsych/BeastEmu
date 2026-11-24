@@ -67,7 +67,8 @@ void submitBlock() {
 }  // namespace
 
 #define API extern "C" __declspec(dllexport)
-API HRESULT audio_open() {
+API HRESULT audio_open_at_rate(uint32_t rate) {
+  if (rate < 8000 || rate > 192000) return E_INVALIDARG;
   // Dart can resume the isolate on another thread between calls.
   HRESULT hr = CoIncrementMTAUsage(&apartment);
   if (FAILED(hr)) return hr;
@@ -81,12 +82,14 @@ API HRESULT audio_open() {
   WAVEFORMATEX format{};
   format.wFormatTag = WAVE_FORMAT_PCM;
   format.nChannels = 2;
-  format.nSamplesPerSec = 48000;
+  format.nSamplesPerSec = rate;
   format.wBitsPerSample = 16;
   format.nBlockAlign = 4;
   format.nAvgBytesPerSec = format.nSamplesPerSec * format.nBlockAlign;
   return engine->CreateSourceVoice(&source, &format);
 }
+
+API HRESULT audio_open() { return audio_open_at_rate(48000); }
 
 API HRESULT audio_set_volume(uint32_t percent) {
   if (!source || percent > 100) return E_INVALIDARG;
