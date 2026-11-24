@@ -79,6 +79,7 @@ Future<void> _open(
   _Session session, {
   Gamepads? pads,
   bool dual = false,
+  bool gba = false,
   EmulationSettings? settings,
 }) async {
   await tester.binding.setSurfaceSize(const Size(1100, 850));
@@ -96,7 +97,7 @@ Future<void> _open(
                 gamepads: pads,
                 settings: settings ?? EmulationSettings(),
                 bindings: KeyboardBindings(),
-                romPath: 'synthetic.gb',
+                romPath: gba ? 'synthetic.gba' : 'synthetic.gb',
                 partner: dual
                     ? (path: 'synthetic.gbc', title: 'Parceiro')
                     : null,
@@ -142,6 +143,29 @@ Future<void> _firstFrame(
 }
 
 void main() {
+  testWidgets('Sessão GBA restringe persistência, velocidade e reconhece L/R', (
+    tester,
+  ) async {
+    final session = _Session();
+    await _open(tester, session, gba: true);
+    expect(find.textContaining('sem saves'), findsOneWidget);
+    expect(find.text('Salvar estado'), findsNothing);
+    expect(find.text('Carregar estado'), findsNothing);
+    expect(find.text('Acelerar'), findsNothing);
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.keyQ);
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.keyE);
+    expect(session.masks.last, (1 << 10) | (1 << 11));
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.keyE);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.keyQ);
+    expect(session.masks.last, 0);
+    await tester.sendKeyEvent(LogicalKeyboardKey.f5);
+    await tester.sendKeyEvent(LogicalKeyboardKey.f8);
+    expect(session.commands, isEmpty);
+    expect(session.speeds, isEmpty);
+    await tester.tap(find.byTooltip('Fechar'));
+    await _update(tester);
+    expect(session.stops, 1);
+  });
   TestWidgetsFlutterBinding.ensureInitialized();
   final messenger =
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;

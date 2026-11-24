@@ -2,7 +2,8 @@ import 'dart:io';
 
 enum SameBoyHelper {
   live('sameboy-live', 'stream_sameboy'),
-  preview('sameboy-preview', 'run_sameboy_frames');
+  preview('sameboy-preview', 'run_sameboy_frames'),
+  gba('mgba-live', 'stream_mgba');
 
   const SameBoyHelper(this.binary, this.script);
   final String binary;
@@ -26,9 +27,10 @@ class SameBoyLaunch {
     final app = appDirectory ?? File(Platform.resolvedExecutable).parent;
     final portable = Directory('${app.path}/helpers').existsSync();
     final root = (portable ? app : checkout ?? Directory.current).absolute;
-    final core = File('${root.path}/cores/windows/sameboy_libretro.dll');
+    final name = helper == SameBoyHelper.gba ? 'mGBA' : 'SameBoy';
+    final core = File('${root.path}/cores/windows/${name.toLowerCase()}_libretro.dll');
     if (!core.existsSync()) {
-      throw StateError('Núcleo SameBoy ausente: ${core.path}');
+      throw StateError('Núcleo $name ausente: ${core.path}');
     }
     if (portable) {
       final exe = File('${app.path}/helpers/${helper.binary}.exe');

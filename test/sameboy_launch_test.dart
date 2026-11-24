@@ -12,6 +12,7 @@ void main() {
       final checkout = Directory('${app.path}/unrelated');
       await File('${app.path}/cores/windows/sameboy_libretro.dll')
           .create(recursive: true);
+      await File('${app.path}/cores/windows/mgba_libretro.dll').create();
       await Directory('${app.path}/helpers').create();
       for (final helper in SameBoyHelper.values) {
         expect(

@@ -9,6 +9,8 @@ import 'package:beastemu/services/sameboy_commands.dart';
 import 'package:beastemu/services/sameboy_launch.dart';
 
 import 'sameboy_link_protocol.dart';
+import 'gba_cartridge.dart';
+import 'gba_video.dart';
 
 /// Sessão do SameBoy em um processo auxiliar no Windows.
 /// O video usa TCP restrito a localhost; o teclado envia mascaras de 16 bits.
@@ -32,10 +34,19 @@ class SameBoyLiveService {
   Completer<List<String?>>? _stateReply;
   int? _pendingCommand;
   bool cartridgeProtected = false;
+  bool _gba = false;
+  final _gbaVideo = GbaVideoDecoder();
+  int get frameWidth => _gba
+      ? _gbaVideo.width
+      : linkRomPath == null
+      ? 160
+      : linkWidth;
+  int get frameHeight => _gba ? _gbaVideo.height : 144;
 
   Future<List<String?>> stateCommand(int byte) {
     final commands = _commands;
-    if (linkRomPath != null ||
+    if (_gba ||
+        linkRomPath != null ||
         !isStateCommand(byte) ||
         commands == null ||
         _stopping ||
@@ -99,7 +110,18 @@ class SameBoyLiveService {
     }
     final rom = File(romPath);
     if (!rom.existsSync()) throw StateError('ROM ausente: ${rom.path}');
-    final launch = SameBoyLaunch.resolve(SameBoyHelper.live);
+    final core = coreForPath(romPath);
+    if (core == null) {
+      throw const FormatException('Extensão de cartucho inválida.');
+    }
+    _gba = core == CartridgeCore.mgba;
+    if (linkRomPath != null &&
+        (_gba || coreForPath(linkRomPath!) != CartridgeCore.sameBoy)) {
+      throw UnsupportedError('O Link Cable requer dois cartuchos GB/GBC.');
+    }
+    final launch = SameBoyLaunch.resolve(
+      _gba ? SameBoyHelper.gba : SameBoyHelper.live,
+    );
     _volume = volume.clamp(0, 100);
     final partner = linkRomPath == null ? null : File(linkRomPath!);
     if (partner != null && !partner.existsSync()) {
@@ -125,7 +147,9 @@ class SameBoyLiveService {
         ],
         workingDirectory: launch.root.path,
         environment: {
-          sameBoyCommandEnvironment: partner == null ? '1' : '0',
+          if (Platform.environment['LOCALAPPDATA'] case final local?)
+            'LOCALAPPDATA': '$local/BeastEmu-GBA-Dev',
+          sameBoyCommandEnvironment: !_gba && partner == null ? '1' : '0',
           expectedRomEnvironment: expectedRomHash ?? '',
           sameBoyVolumeEnvironment: launchVolume.toString(),
           'BEASTEMU_AUDIO_DLL':
@@ -157,13 +181,22 @@ class SameBoyLiveService {
         _process!.exitCode.then((code) {
           if (!_stopping) {
             onError(
-              'SameBoy encerrou (código $code). '
+              '${_gba ? "mGBA" : "SameBoy"} encerrou (código $code). '
               'Últimas mensagens:\n$_logs',
             );
           }
         }),
       );
-      _socket = await _server!.first.timeout(const Duration(seconds: 15));
+      final connection = _server!.first;
+      final ready = _gba
+          ? Future.any<Socket>([
+              connection,
+              _process!.exitCode.then<Socket>(
+                (code) => throw StateError('mGBA encerrou ($code). $_logs'),
+              ),
+            ])
+          : connection;
+      _socket = await ready.timeout(const Duration(seconds: 15));
       if (_stopping) {
         // The dialog closed while Dart was starting. Release the child's
         // connection so it can finish restoring/flushing and drop its lock.
@@ -174,7 +207,18 @@ class SameBoyLiveService {
       }
       _socket!.setOption(SocketOption.tcpNoDelay, true);
       _subscription = _socket!.listen(
-        (data) => parser.add(data, onFrame),
+        (data) {
+          if (!_gba) {
+            parser.add(data, onFrame);
+            return;
+          }
+          try {
+            _gbaVideo.add(data, onFrame);
+          } on FormatException catch (error) {
+            onError(error.message);
+            _socket?.destroy();
+          }
+        },
         onError: (Object error) {
           if (!_stopping) onError('Falha na transmissão de video: $error');
         },
@@ -212,7 +256,7 @@ class SameBoyLiveService {
   int _speed = 1;
   void setSpeed(int speed) {
     RangeError.checkValueInInterval(speed, 1, 4, 'speed');
-    if (linkRomPath != null || _speed == speed || _stopping) return;
+    if (_gba || linkRomPath != null || _speed == speed || _stopping) return;
     _speed = speed;
     _commands?.add([speedNormal + speed - 1]);
   }

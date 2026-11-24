@@ -22,7 +22,10 @@ class GameEntry {
   final String? romHash;
 
   bool matchesConsole(String? filter) =>
-      filter == null || console == filter || console == 'GB / GBC';
+      filter == null ||
+      console == filter ||
+      (console == 'GB / GBC' &&
+          (filter == 'Game Boy' || filter == 'Game Boy Color'));
 
   GameEntry copyWith({
     String? title,

@@ -1,5 +1,7 @@
 # BeastEmu
 
+**Branch de desenvolvimento GBA para Windows x64.** Para compilar, gerar o cartucho de demonstração e testar o mGBA com um perfil separado, siga o [guia do marco experimental](docs/gba-dev.md). A descrição da beta GB/GBC aparece abaixo.
+
 <img src="assets/brand/logo-horizontal.png" width="333" alt="BeastEmu · Beast Edition">
 
 Emulador de Game Boy e Game Boy Color para Windows x64, com interface Beast Edition em português e núcleo SameBoy Libretro. Primeira beta para Windows: **v0.1.1-beta.1**, build 3.

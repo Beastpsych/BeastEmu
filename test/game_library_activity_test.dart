@@ -1,4 +1,9 @@
 import 'dart:io';
+
+import '../tool/gba_demo.dart';
+
+import 'package:crypto/crypto.dart';
+
 import 'dart:typed_data';
 
 import 'package:beastemu/services/game_library_service.dart';
@@ -33,6 +38,39 @@ final class _Rom extends PlatformFile {
 }
 
 void main() {
+  test('importação GBA conserva os registros GB, hash, favorito e extensão na recuperação', () async {
+    final dir = await Directory.systemTemp.createTemp('gba-library-');
+    addTearDown(() => dir.delete(recursive: true));
+    final lib = GameLibraryService(
+      romDirectory: dir,
+      preferences: _Preferences(),
+    );
+    final gb = await lib.importGameBoyFiles([
+      _Rom('old.gbc', Uint8List(32768)..[0x143] = 0x80),
+    ], []);
+    final data = gbaDemo();
+    final source = _Rom('demo.GBA', data);
+    final result = await lib.importGameBoyFiles([
+      source,
+      _Rom('duplicate.gba', data),
+      _Rom('bad.gba', Uint8List(400)),
+    ], gb.games);
+    expect((result.added, result.duplicates, result.skipped), (1, 1, 1));
+    expect(result.games.first.toJson(), gb.games.single.toJson());
+    expect(result.games.first.matchesConsole('Game Boy Advance'), false);
+    final game = result.games.last;
+    expect(game.matchesConsole('Game Boy Advance'), true);
+    expect(game.romHash, sha256.convert(data).toString());
+    final games = await lib.updateEntry(
+      game.copyWith(favorite: true),
+      result.games,
+    );
+    await File(game.localPath).delete();
+    final recovered = await lib.recover(games.last, games, source);
+    expect(recovered.last.localPath, endsWith('.gba'));
+    expect((await lib.loadGames()).last.favorite, true);
+    expect(await File(recovered.last.localPath).readAsBytes(), data);
+  });
   test(
     'conteúdo distingue nomes iguais e reconhece a mesma ROM renomeada',
     () async {

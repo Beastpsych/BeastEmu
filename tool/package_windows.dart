@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:crypto/crypto.dart';
+import 'package:beastemu/services/gba_cartridge.dart';
 
 /// Run from the checkout after flutter build windows. Only runtime artifacts
 /// from the release, the two helpers, notices and the tested core are bundled.
@@ -20,6 +21,10 @@ Future<void> main() async {
     throw StateError(
       'O núcleo mudou. Verifique ABI, estados e licença antes de empacotar.',
     );
+  }
+  final mgba = File('cores/windows/mgba_libretro.dll');
+  if ((await sha256.bind(mgba.openRead()).first).toString() != mgbaCoreHash) {
+    throw StateError('A DLL mGBA difere da revisão de desenvolvimento.');
   }
   final parent = await Directory('build/portable').create(recursive: true);
   final stage = await parent.createTemp('.staging-');
@@ -49,6 +54,10 @@ Future<void> main() async {
     }
   }
   await copy(core.path, 'cores/windows/sameboy_libretro.dll');
+  await copy(mgba.path, 'cores/windows/mgba_libretro.dll');
+  await copy('docs/mGBA-LICENSE.txt', 'licenses/mGBA.txt');
+  await copy('docs/mGBA-inih.txt', 'licenses/mGBA-inih.txt');
+  await copy('docs/gba-dev.md', 'GBA-DEV.md');
   await copy('LICENSE', 'LICENSE');
   await copy('MARCA.md', 'MARCA.md');
   await copy('docs/SameBoy-LICENSE.txt', 'licenses/SameBoy.txt');
@@ -85,6 +94,7 @@ Future<void> main() async {
   final helpers = await Directory('${stage.path}/helpers').create();
   for (final item in {
     'stream_sameboy': 'sameboy-live',
+    'stream_mgba': 'mgba-live',
     'run_sameboy_frames': 'sameboy-preview',
   }.entries) {
     final result = await Process.run('$sdk/bin/dart.exe', [
@@ -101,7 +111,7 @@ Future<void> main() async {
     }
   }
   final folder = await stage.rename(
-    '${parent.path}/BeastEmu-Windows-x64-${DateTime.now().microsecondsSinceEpoch}',
+    '${parent.path}/BeastEmu-GBA-Dev-Windows-x64-${DateTime.now().microsecondsSinceEpoch}',
   );
   stdout.writeln(folder.absolute.path);
 }

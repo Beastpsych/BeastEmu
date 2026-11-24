@@ -354,7 +354,10 @@ class _BeastHomeState extends State<BeastHome> {
       spacing: 14,
       runSpacing: 14,
       children: consoles.map((name) {
-        final supported = name == 'Game Boy' || name == 'Game Boy Color';
+        final supported =
+            name == 'Game Boy' ||
+            name == 'Game Boy Color' ||
+            name == 'Game Boy Advance';
         return InkWell(
           onTap: supported ? () => openConsole(name) : null,
           child: Container(
@@ -380,6 +383,8 @@ class _BeastHomeState extends State<BeastHome> {
                 Text(
                   name == 'Game Boy' || name == 'Game Boy Color'
                       ? 'Disponível'
+                      : name == 'Game Boy Advance'
+                      ? 'Em teste'
                       : 'Planejado',
                   style: const TextStyle(color: Colors.grey, fontSize: 12),
                 ),

@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:beastemu/core/theme.dart';
+import 'package:beastemu/services/gba_cartridge.dart';
+import 'package:beastemu/services/xinput.dart' show PadControl;
 import 'package:beastemu/services/emulation_settings.dart';
 import 'package:beastemu/services/sameboy_commands.dart';
 import 'package:beastemu/widgets/emulation_settings_panel.dart';
@@ -46,6 +48,8 @@ class SameBoyLiveDialog extends StatefulWidget {
 }
 
 class _SameBoyLiveDialogState extends State<SameBoyLiveDialog> {
+  bool get _gba => coreForPath(widget.romPath) == CartridgeCore.mgba;
+  bool get _singleSameBoy => !_dual && !_gba;
   bool get _dual => widget.partner != null;
   late final _service =
       widget.service ??
@@ -56,7 +60,10 @@ class _SameBoyLiveDialogState extends State<SameBoyLiveDialog> {
   static const _window = MethodChannel('beastemu/window');
   bool _fullscreen = false;
   bool _changingWindow = false;
-  late final _input = GameBoyInputController(bindings: widget.bindings);
+  late final _input = GameBoyInputController(
+    bindings: widget.bindings,
+    gba: _gba,
+  );
   late final _second = _dual
       ? GameBoyInputController(bindings: widget.bindings)
       : null;
@@ -97,7 +104,14 @@ class _SameBoyLiveDialogState extends State<SameBoyLiveDialog> {
         if (pads.raw(slot) != 0) return;
         _waitForNeutral[index] = false;
       }
-      controller.setDeviceButtons(pads.buttonsFor(source));
+      final raw = pads.raw(slot);
+      final shoulders =
+          (raw & PadControl.lb.bit != 0 ? 1 << 10 : 0) |
+          (raw & PadControl.rb.bit != 0 ? 1 << 11 : 0);
+      controller.setDeviceButtons(
+        pads.buttonsFor(source),
+        shoulders: _gba ? shoulders : 0,
+      );
     }
 
     apply(0, _input, keyboardAndOnePad ? null : PadPlayer.one);
@@ -201,7 +215,11 @@ class _SameBoyLiveDialogState extends State<SameBoyLiveDialog> {
   String? _feedback;
   bool _quickBusy = false;
   Future<void> _quickState(bool save) async {
-    if (_quickBusy || _dual || _image == null || _error != null || _closing) {
+    if (_quickBusy ||
+        !_singleSameBoy ||
+        _image == null ||
+        _error != null ||
+        _closing) {
       return;
     }
     _quickBusy = true;
@@ -328,8 +346,12 @@ class _SameBoyLiveDialogState extends State<SameBoyLiveDialog> {
     try {
       ui.decodeImageFromPixels(
         rgba,
-        _dual ? linkWidth : 160,
-        144,
+        _gba
+            ? _service.frameWidth
+            : _dual
+            ? linkWidth
+            : 160,
+        _gba ? _service.frameHeight : 144,
         ui.PixelFormat.rgba8888,
         (ui.Image image) {
           _decoding = false;
@@ -394,8 +416,8 @@ class _SameBoyLiveDialogState extends State<SameBoyLiveDialog> {
           mainAxisSize: MainAxisSize.min,
           children: [
             if (!_closing && _error != null) ...[
-              const Text(
-                'Falha na sessão do SameBoy',
+              Text(
+                _gba ? 'Falha na sessão do mGBA' : 'Falha na sessão do SameBoy',
                 textAlign: TextAlign.center,
               ),
               TextButton(
@@ -419,7 +441,13 @@ class _SameBoyLiveDialogState extends State<SameBoyLiveDialog> {
             ] else ...[
               const CircularProgressIndicator(color: beastRed),
               const SizedBox(height: 12),
-              Text(_closing ? 'Encerrando sessão…' : 'Iniciando SameBoy…'),
+              Text(
+                _closing
+                    ? 'Encerrando sessão…'
+                    : _gba
+                    ? 'Iniciando mGBA…'
+                    : 'Iniciando SameBoy…',
+              ),
             ],
           ],
         ),
@@ -456,7 +484,7 @@ class _SameBoyLiveDialogState extends State<SameBoyLiveDialog> {
       switch (action) {
         case EmulatorShortcut.quickSave:
         case EmulatorShortcut.quickLoad:
-          if (!_dual) {
+          if (_singleSameBoy) {
             unawaited(_quickState(action == EmulatorShortcut.quickSave));
           }
         case EmulatorShortcut.mute:
@@ -464,9 +492,9 @@ class _SameBoyLiveDialogState extends State<SameBoyLiveDialog> {
           unawaited(widget.settings.setMuted(muted));
           _showFeedback(muted ? 'Áudio silenciado.' : 'Áudio ativado.');
         case EmulatorShortcut.cycleSpeed:
-          if (!_dual) _cycleSpeed();
+          if (_singleSameBoy) _cycleSpeed();
         case EmulatorShortcut.holdSpeed:
-          if (!_dual) _holdSpeed(true);
+          if (_singleSameBoy) _holdSpeed(true);
         case EmulatorShortcut.fullscreen:
           unawaited(_setFullscreen(!_fullscreen));
       }
@@ -509,7 +537,7 @@ class _SameBoyLiveDialogState extends State<SameBoyLiveDialog> {
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                 ),
-                if (!_dual)
+                if (_singleSameBoy)
                   Semantics(
                     label: 'Velocidade atual',
                     child: Text(
@@ -521,7 +549,7 @@ class _SameBoyLiveDialogState extends State<SameBoyLiveDialog> {
                       ),
                     ),
                   ),
-                if (!_dual)
+                if (_singleSameBoy)
                   for (final action in StateSlotAction.values)
                     TextButton.icon(
                       onPressed: _closing || _image == null || _error != null
@@ -536,7 +564,7 @@ class _SameBoyLiveDialogState extends State<SameBoyLiveDialog> {
                             ),
                       label: Text(action.label),
                     ),
-                if (!_dual)
+                if (_singleSameBoy)
                   Tooltip(
                     message: 'Selecionar ${_selectedSpeed % 4 + 1}×',
                     child: Semantics(
@@ -623,6 +651,11 @@ class _SameBoyLiveDialogState extends State<SameBoyLiveDialog> {
                       : MainAxisSize.min,
                   children: [
                     _toolbar(),
+                    if (_gba)
+                      const Text(
+                        'GBA experimental · apenas homebrew de teste · sem saves · L/R: Q/E ou LB/RB',
+                        textAlign: TextAlign.center,
+                      ),
                     if (widget.partner case final partner?)
                       Row(
                         children: [
@@ -648,7 +681,14 @@ class _SameBoyLiveDialogState extends State<SameBoyLiveDialog> {
                       Semantics(liveRegion: true, child: Text(_feedback!)),
                     Expanded(
                       child: GameBoyViewport(
-                        nativeWidth: _dual ? linkWidth : 160,
+                        nativeWidth:
+                            _image?.width ??
+                            (_gba
+                                ? 240
+                                : _dual
+                                ? linkWidth
+                                : 160),
+                        nativeHeight: _image?.height ?? (_gba ? 160 : 144),
                         scale: widget.settings.scale,
                         child: _display(),
                       ),
