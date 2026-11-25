@@ -15,10 +15,12 @@ import 'inspect_sameboy.dart'
     show RetroSystemInfo, GetSystemInfoNative, GetSystemInfoDart;
 import 'libretro_abi.dart';
 import 'sameboy_audio_output.dart';
+import 'mgba_save.dart';
 
 Future<void> main(List<String> args) async {
   final arena = Arena();
   final cleanup = <void Function()>[];
+  MgbaSave? save;
   Socket? socket;
   StreamSubscription<List<int>>? commands;
   SameBoyAudioOutput? audio;
@@ -34,10 +36,9 @@ Future<void> main(List<String> args) async {
     }
     final rom = await file.readAsBytes();
     gbaTitle(rom);
+    final romId = sha256.convert(rom).toString();
     final expected = Platform.environment[expectedRomEnvironment];
-    if (expected != null &&
-        expected.isNotEmpty &&
-        sha256.convert(rom).toString() != expected) {
+    if (expected != null && expected.isNotEmpty && romId != expected) {
       throw const FormatException(
         'O conteúdo da ROM GBA diverge da biblioteca.',
       );
@@ -184,6 +185,11 @@ Future<void> main(List<String> args) async {
       throw const FormatException('mGBA recusou a ROM.');
     }
     cleanup.add(unload);
+    save = await MgbaSave.attach(
+      lib,
+      romId,
+      (status) => stdout.writeln('GBA_SAVE $status'),
+    );
     lib.lookupFunction<Void Function(Uint32, Uint32), void Function(int, int)>(
       'retro_set_controller_port_device',
     )(0, 1);
@@ -260,6 +266,7 @@ Future<void> main(List<String> args) async {
         );
       }
       frame++;
+      if (frame == 1 || frame % 300 == 0) save.tick();
       deadline += interval;
       if (clock.elapsedMicroseconds - deadline > interval * 3) {
         deadline = clock.elapsedMicroseconds;
@@ -268,6 +275,9 @@ Future<void> main(List<String> args) async {
         Duration(microseconds: deadline - clock.elapsedMicroseconds),
       );
     }
+    final finishing = save;
+    save = null;
+    await finishing.close(flush: true);
     stdout.writeln(
       'mGBA encerrado · $frame quadros · $samples amostras estéreo.',
     );
@@ -275,6 +285,12 @@ Future<void> main(List<String> args) async {
     stderr.writeln('Falha na sessão mGBA: $error');
     exitCode = 1;
   } finally {
+    try {
+      await save?.close(flush: false);
+    } catch (error) {
+      stderr.writeln(error);
+      exitCode = 1;
+    }
     for (final close in cleanup.reversed) {
       close();
     }

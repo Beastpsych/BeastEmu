@@ -134,7 +134,13 @@ void main() {
       expect(log, contains('mGBA encerrado'));
       expect(log, matches(RegExp(r'[1-9]\d* amostras estéreo')));
       printOnFailure(log);
-      expect(await profile.list(recursive: true).toList(), isEmpty);
+      expect(
+        await profile
+            .list(recursive: true)
+            .where((e) => e is File && !e.path.endsWith('cart.lock'))
+            .toList(),
+        isEmpty,
+      );
     },
     skip: !Platform.isWindows,
     timeout: const Timeout(Duration(seconds: 60)),

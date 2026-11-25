@@ -148,7 +148,7 @@ void main() {
   ) async {
     final session = _Session();
     await _open(tester, session, gba: true);
-    expect(find.textContaining('sem saves'), findsOneWidget);
+    expect(find.textContaining('Aguardando dados de cartucho'), findsOneWidget);
     expect(find.text('Salvar estado'), findsNothing);
     expect(find.text('Carregar estado'), findsNothing);
     expect(find.text('Acelerar'), findsNothing);

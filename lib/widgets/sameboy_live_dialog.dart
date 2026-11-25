@@ -307,7 +307,7 @@ class _SameBoyLiveDialogState extends State<SameBoyLiveDialog> {
         _closing = false;
         _error = 'Falha ao encerrar a sessão: $error';
       });
-      _stopTask = _dual && error is TimeoutException
+      _stopTask = (_dual || _gba) && error is TimeoutException
           ? null
           : Future<void>.value();
       return;
@@ -652,8 +652,8 @@ class _SameBoyLiveDialogState extends State<SameBoyLiveDialog> {
                   children: [
                     _toolbar(),
                     if (_gba)
-                      const Text(
-                        'GBA experimental · apenas homebrew de teste · sem saves · L/R: Q/E ou LB/RB',
+                      Text(
+                        'GBA experimental · ${_service.gbaSaveStatus} · L/R: Q/E ou LB/RB',
                         textAlign: TextAlign.center,
                       ),
                     if (widget.partner case final partner?)

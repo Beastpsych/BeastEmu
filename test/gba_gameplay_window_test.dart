@@ -15,7 +15,7 @@ import '../tool/gba_demo.dart';
 // Widget tests advance a virtual clock. Keep sockets, process exit and the
 // real core on wall-clock time while Flutter controls its own frame pumps.
 class _WindowsSession extends SameBoyLiveService {
-  _WindowsSession(this.io);
+  _WindowsSession(this.io, Directory dir) : super(profileRoot: dir);
   final Zone io;
 
   @override
@@ -44,7 +44,7 @@ void main() {
     final io = (await tester.runAsync(() async => Zone.current))!;
     final dir = Directory.systemTemp.createTempSync('beast-gba-window-');
     final rom = File('${dir.path}/demo.gba')..writeAsBytesSync(gbaDemo());
-    final session = _WindowsSession(io);
+    final session = _WindowsSession(io, dir);
     addTearDown(() async {
       await session.stop();
       dir.deleteSync(recursive: true);

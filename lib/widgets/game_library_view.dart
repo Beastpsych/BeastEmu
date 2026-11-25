@@ -217,7 +217,7 @@ class _GameLibraryViewState extends State<GameLibraryView> {
         builder: (context) => AlertDialog(
           title: const Text('Game Boy Advance · Experimental'),
           content: const Text(
-            'Use uma ROM sintética ou homebrew de teste. O progresso GBA existe apenas na memória e se perde ao sair.',
+            'Use uma ROM sintética ou homebrew de teste. Salve pelo menu do próprio jogo e aguarde o encerramento da sessão.',
           ),
           actions: [
             TextButton(
@@ -271,7 +271,8 @@ class _GameLibraryViewState extends State<GameLibraryView> {
                       items: [
                         for (final game in _games.where(
                           (g) =>
-                              coreForPath(g.originalName) == CartridgeCore.sameBoy,
+                              coreForPath(g.originalName) ==
+                              CartridgeCore.sameBoy,
                         ))
                           DropdownMenuItem(
                             value: game,
@@ -447,7 +448,8 @@ class _GameLibraryViewState extends State<GameLibraryView> {
                       _busy ||
                       !_games.any(
                         (g) =>
-                            coreForPath(g.originalName) == CartridgeCore.sameBoy,
+                            coreForPath(g.originalName) ==
+                            CartridgeCore.sameBoy,
                       )
                   ? null
                   : _linkLocal,

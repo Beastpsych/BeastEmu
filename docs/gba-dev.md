@@ -1,6 +1,6 @@
 # Game Boy Advance experimental · Windows x64
 
-Este build local usa um perfil de desenvolvimento. Importe somente cartuchos sintéticos ou homebrew de teste. **O progresso GBA se perde ao fechar o jogo.** A sessão individual mantém o teclado configurado e aceita direcional, A, B, Start e Select. Q e E acionam L e R quando livres de outros mapeamentos. No controle XInput, use LB e RB. A janela preserva a proporção, permite ajustar volume ou mudo e encerra o auxiliar ao sair.
+Este build local usa um perfil de desenvolvimento. Importe somente cartuchos sintéticos ou homebrew de teste. Para guardar o progresso, use o menu interno de um jogo com memória de cartucho e aguarde o fechamento da sessão. A sessão individual mantém o teclado configurado e aceita direcional, A, B, Start e Select. Q e E acionam L e R quando livres de outros mapeamentos. No controle XInput, use LB e RB. A janela preserva a proporção, permite ajustar volume ou mudo e encerra o auxiliar ao sair.
 
 ## Testar o marco
 
@@ -34,7 +34,16 @@ No protocolo de vídeo GBA, os primeiros quatro bytes contêm largura e altura e
 
 As preferências e a biblioteca de desenvolvimento ficam em `%APPDATA%\BeastEmu\BeastEmu GBA Dev`. O auxiliar SameBoy iniciado por esse aplicativo recebe uma raiz de dados de desenvolvimento em `%LOCALAPPDATA%\BeastEmu-GBA-Dev`. O auxiliar GBA não chama o gerenciador de cartuchos ou de estados do SameBoy.
 
-Na demonstração, `retro_get_memory_size(SAVE_RAM)` anunciou 131.072 bytes logo após a carga e RTC anunciou zero. O fonte da revisão retorna esse máximo enquanto o tipo está em autodetecção. A persistência futura precisa acompanhar EEPROM (512 B / 8 KiB), SRAM e Flash (64 / 128 KiB), o tamanho efetivamente detectado e os periféricos do cartucho. O plano é usar uma pasta `saves/mgba/<sha256>/` no perfil de desenvolvimento, identificar formato e tamanho, testar restauração após reiniciar e gravar atomicamente com proteção contra colisão de sessões. O arquivo .cart do SameBoy tem formato próprio. Save states, aceleração e multiplayer GBA ficam fora deste marco. [Implementação Libretro da revisão](https://github.com/libretro/mgba/blob/7a12d6d4b9acb14c0ae62c9166b6a2f3d08007f6/src/platform/libretro/libretro.c)
+Depois de `retro_load_game`, a DLL fornece um ponteiro de SAVE_RAM com até 131.072 bytes, inicialmente preenchidos com FF. O primeiro `retro_run` associa esse buffer ao cartucho. O auxiliar restaura somente os bytes validados antes desse primeiro quadro e consulta novamente ponteiro e tamanho entre quadros. Um buffer inicial de 128 KiB também pode representar autodetecção. A gravação só ocorre após mudança de conteúdo. Uma EEPROM pode crescer de 512 B para 8 KiB e a Flash de 64 para 128 KiB ao acessar outro banco. O auxiliar preserva o save maior se o jogo ainda não o identificou por completo. [Implementação da revisão](https://github.com/libretro/mgba/blob/7a12d6d4b9acb14c0ae62c9166b6a2f3d08007f6/src/platform/libretro/libretro.c)
+
+Cada ROM tem um diretório em `%LOCALAPPDATA%\BeastEmu-GBA-Dev\BeastEmu\saves\mgba\<SHA-256 da ROM>\`. O índice `cart.json` identifica a imagem atual e a anterior. Cada arquivo `<SHA-256 do conteúdo>.sav` contém os bytes brutos do cartucho no tamanho detectado. Para fazer backup, feche a sessão e copie a pasta inteira. Cópias idênticas e arquivos renomeados usam o mesmo diretório. A sessão mantém um bloqueio exclusivo até o fechamento. O auxiliar confere alterações a cada 300 quadros (aproximadamente cinco segundos) e ao sair. Escreve e verifica a imagem temporária antes de publicar o índice por renomeação no mesmo volume. Uma interrupção pode deixar um arquivo temporário ou uma imagem sem referência. Ao reabrir, vale a última geração confirmada pelo índice.
+
+Um save inválido, uma alteração externa ou um tamanho incompatível gera um erro. Preserve a pasta para recuperação. Para restaurar um backup da pasta, primeiro feche todas as sessões e guarde uma cópia dos arquivos atuais. Buffers totalmente FF ou zero nunca substituem progresso válido. Esse cuidado também impede a persistência de um apagamento integral intencional do cartucho. O RTC do GBA não tem região independente exposta por esta DLL. A validação cobre os dados EEPROM, SRAM e Flash. Save states, aceleração e multiplayer GBA continuam indisponíveis.
+
+### Conferir o progresso com um cartucho de teste
+
+Na raiz desta cópia, execute `dart test/support/gba_save_rom.dart 32768 build/Progresso-SRAM.gba` com um destino novo. Os outros tamanhos aceitos são 512, 8192, 65536 e 131072. Importe o arquivo e inicie o jogo. Vermelho significa que o cartucho ainda não contém o marcador. Pressione A para gravar. O programa lê o marcador e pinta a tela de verde. Saia da sessão, feche o BeastEmu, abra novamente e entre no jogo. A tela deve ficar verde antes de pressionar qualquer botão. Com um homebrew que ofereça menu de save, guarde uma posição identificável pelo próprio menu e confira essa posição após reiniciar.
+
 
 ## Créditos
 

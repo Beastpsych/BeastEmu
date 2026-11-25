@@ -16,7 +16,16 @@ import 'gba_video.dart';
 /// O video usa TCP restrito a localhost; o teclado envia mascaras de 16 bits.
 /// Nao sera a arquitetura definitiva para Android/distribuicao.
 class SameBoyLiveService {
-  SameBoyLiveService({this.linkRomPath, this.expectedRomHash});
+  SameBoyLiveService({
+    this.linkRomPath,
+    this.expectedRomHash,
+    this.profileRoot,
+    this.appDirectory,
+  });
+  final Directory? appDirectory;
+  Future<void>? _gbaLogsDone;
+  final Directory? profileRoot;
+  String gbaSaveStatus = 'Aguardando dados de cartucho';
   final String? expectedRomHash;
   final String? linkRomPath;
   ServerSocket? _server;
@@ -67,6 +76,9 @@ class SameBoyLiveService {
   }
 
   void _onOutput(String line) {
+    if (_gba && line.startsWith('GBA_SAVE ')) {
+      gbaSaveStatus = line.substring(9);
+    }
     if (!line.startsWith(stateReplyPrefix)) {
       _appendLog('$line\n');
       return;
@@ -121,6 +133,7 @@ class SameBoyLiveService {
     }
     final launch = SameBoyLaunch.resolve(
       _gba ? SameBoyHelper.gba : SameBoyHelper.live,
+      appDirectory: appDirectory,
     );
     _volume = volume.clamp(0, 100);
     final partner = linkRomPath == null ? null : File(linkRomPath!);
@@ -147,7 +160,8 @@ class SameBoyLiveService {
         ],
         workingDirectory: launch.root.path,
         environment: {
-          if (Platform.environment['LOCALAPPDATA'] case final local?)
+          if ((profileRoot?.path ?? Platform.environment['LOCALAPPDATA'])
+              case final local?)
             'LOCALAPPDATA': '$local/BeastEmu-GBA-Dev',
           sameBoyCommandEnvironment: !_gba && partner == null ? '1' : '0',
           expectedRomEnvironment: expectedRomHash ?? '',
@@ -174,11 +188,17 @@ class SameBoyLiveService {
           .transform(const Utf8Decoder(allowMalformed: true))
           .transform(const LineSplitter())
           .listen(_onOutput);
+      final stderrDone = Completer<void>();
       _errSubscription = _process!.stderr
           .transform(const Utf8Decoder(allowMalformed: true))
-          .listen((text) => _appendLog(text));
+          .listen((text) => _appendLog(text), onDone: stderrDone.complete);
+      if (_gba) _gbaLogsDone = stderrDone.future;
+      final ended = _process!.exitCode.then((code) async {
+        if (_gba) await stderrDone.future;
+        return code;
+      });
       unawaited(
-        _process!.exitCode.then((code) {
+        ended.then((code) {
           if (!_stopping) {
             onError(
               '${_gba ? "mGBA" : "SameBoy"} encerrou (código $code). '
@@ -191,7 +211,7 @@ class SameBoyLiveService {
       final ready = _gba
           ? Future.any<Socket>([
               connection,
-              _process!.exitCode.then<Socket>(
+              ended.then<Socket>(
                 (code) => throw StateError('mGBA encerrou ($code). $_logs'),
               ),
             ])
@@ -300,7 +320,7 @@ class SameBoyLiveService {
       await _release();
     } on TimeoutException {
       // Both cartridges are still owned by this helper until it exits.
-      if (linkRomPath != null) _shutdown = null;
+      if (_gba || linkRomPath != null) _shutdown = null;
       rethrow;
     }
   }
@@ -323,12 +343,13 @@ class SameBoyLiveService {
         );
       }
     }
+    await _gbaLogsDone;
     await _outSubscription?.cancel();
     await _errSubscription?.cancel();
     _process = null;
-    if (linkRomPath != null && exitCode != null && exitCode != 0) {
+    if ((_gba || linkRomPath != null) && exitCode != null && exitCode != 0) {
       throw StateError(
-        'O auxiliar Link Cable encerrou com código $exitCode. $_logs',
+        'O auxiliar ${_gba ? 'mGBA' : 'Link Cable'} encerrou com código $exitCode. $_logs',
       );
     }
   }
