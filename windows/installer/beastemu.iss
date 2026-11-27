@@ -4,7 +4,7 @@
 #endif
 
 [Setup]
-AppId={{EA0278D8-06C3-4CE8-9AC3-0219910142EE}
+AppId={{04248C8D-1988-4CC3-A2EC-83D97B4A7A35}
 AppName={#AppTitle}
 AppPublisher=BeastEmu
 AppCopyright=Copyright (c) 2026 Beast
@@ -13,7 +13,7 @@ VersionInfoVersion={#NumericVersion}
 VersionInfoTextVersion={#AppVersionText}
 VersionInfoProductVersion={#NumericVersion}
 VersionInfoProductTextVersion={#AppVersionText}
-DefaultDirName={localappdata}\Programs\BeastEmu
+DefaultDirName={localappdata}\Programs\BeastEmu GBA Dev
 DisableDirPage=yes
 UsePreviousAppDir=no
 DisableProgramGroupPage=yes
@@ -67,7 +67,7 @@ function PrepareToInstall(var NeedsRestart: Boolean): String;
 begin
   Result := '';
   if CompareText(ExpandFileName(ExpandConstant('{app}')),
-                 ExpandFileName(ExpandConstant('{localappdata}\Programs\BeastEmu'))) <> 0 then
+                 ExpandFileName(ExpandConstant('{localappdata}\Programs\BeastEmu GBA Dev'))) <> 0 then
     Result := 'Use a pasta de programas da sua conta para instalar o BeastEmu.'
   else if not (HasRuntime(HKLM64) or HasRuntime(HKLM32)) then
     Result := 'Instale o Microsoft Visual C++ v14 Redistributable x64, versão ' +

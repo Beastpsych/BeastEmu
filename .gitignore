@@ -52,6 +52,7 @@ app.*.map.json
 # Coleções, progresso, dados privados e artefatos locais
 *.gb
 *.gbc
+*.gba
 *.sav
 *.srm
 *.rtc

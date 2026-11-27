@@ -9,12 +9,23 @@ import 'package:beastemu/services/sameboy_commands.dart';
 import 'package:beastemu/services/sameboy_launch.dart';
 
 import 'sameboy_link_protocol.dart';
+import 'gba_cartridge.dart';
+import 'gba_video.dart';
 
 /// Sessão do SameBoy em um processo auxiliar no Windows.
 /// O video usa TCP restrito a localhost; o teclado envia mascaras de 16 bits.
 /// Nao sera a arquitetura definitiva para Android/distribuicao.
 class SameBoyLiveService {
-  SameBoyLiveService({this.linkRomPath, this.expectedRomHash});
+  SameBoyLiveService({
+    this.linkRomPath,
+    this.expectedRomHash,
+    this.profileRoot,
+    this.appDirectory,
+  });
+  final Directory? appDirectory;
+  Future<void>? _gbaLogsDone;
+  final Directory? profileRoot;
+  String gbaSaveStatus = 'Aguardando dados de cartucho';
   final String? expectedRomHash;
   final String? linkRomPath;
   ServerSocket? _server;
@@ -32,6 +43,14 @@ class SameBoyLiveService {
   Completer<List<String?>>? _stateReply;
   int? _pendingCommand;
   bool cartridgeProtected = false;
+  bool _gba = false;
+  final _gbaVideo = GbaVideoDecoder();
+  int get frameWidth => _gba
+      ? _gbaVideo.width
+      : linkRomPath == null
+      ? 160
+      : linkWidth;
+  int get frameHeight => _gba ? _gbaVideo.height : 144;
 
   Future<List<String?>> stateCommand(int byte) {
     final commands = _commands;
@@ -56,6 +75,9 @@ class SameBoyLiveService {
   }
 
   void _onOutput(String line) {
+    if (_gba && line.startsWith('GBA_SAVE ')) {
+      gbaSaveStatus = line.substring(9);
+    }
     if (!line.startsWith(stateReplyPrefix)) {
       _appendLog('$line\n');
       return;
@@ -99,7 +121,19 @@ class SameBoyLiveService {
     }
     final rom = File(romPath);
     if (!rom.existsSync()) throw StateError('ROM ausente: ${rom.path}');
-    final launch = SameBoyLaunch.resolve(SameBoyHelper.live);
+    final core = coreForPath(romPath);
+    if (core == null) {
+      throw const FormatException('Extensão de cartucho inválida.');
+    }
+    _gba = core == CartridgeCore.mgba;
+    if (linkRomPath != null &&
+        (_gba || coreForPath(linkRomPath!) != CartridgeCore.sameBoy)) {
+      throw UnsupportedError('O Link Cable requer dois cartuchos GB/GBC.');
+    }
+    final launch = SameBoyLaunch.resolve(
+      _gba ? SameBoyHelper.gba : SameBoyHelper.live,
+      appDirectory: appDirectory,
+    );
     _volume = volume.clamp(0, 100);
     final partner = linkRomPath == null ? null : File(linkRomPath!);
     if (partner != null && !partner.existsSync()) {
@@ -125,6 +159,9 @@ class SameBoyLiveService {
         ],
         workingDirectory: launch.root.path,
         environment: {
+          if ((profileRoot?.path ?? Platform.environment['LOCALAPPDATA'])
+              case final local?)
+            'LOCALAPPDATA': '$local/BeastEmu-GBA-Dev',
           sameBoyCommandEnvironment: partner == null ? '1' : '0',
           expectedRomEnvironment: expectedRomHash ?? '',
           sameBoyVolumeEnvironment: launchVolume.toString(),
@@ -150,20 +187,35 @@ class SameBoyLiveService {
           .transform(const Utf8Decoder(allowMalformed: true))
           .transform(const LineSplitter())
           .listen(_onOutput);
+      final stderrDone = Completer<void>();
       _errSubscription = _process!.stderr
           .transform(const Utf8Decoder(allowMalformed: true))
-          .listen((text) => _appendLog(text));
+          .listen((text) => _appendLog(text), onDone: stderrDone.complete);
+      if (_gba) _gbaLogsDone = stderrDone.future;
+      final ended = _process!.exitCode.then((code) async {
+        if (_gba) await stderrDone.future;
+        return code;
+      });
       unawaited(
-        _process!.exitCode.then((code) {
+        ended.then((code) {
           if (!_stopping) {
             onError(
-              'SameBoy encerrou (código $code). '
+              '${_gba ? "mGBA" : "SameBoy"} encerrou (código $code). '
               'Últimas mensagens:\n$_logs',
             );
           }
         }),
       );
-      _socket = await _server!.first.timeout(const Duration(seconds: 15));
+      final connection = _server!.first;
+      final ready = _gba
+          ? Future.any<Socket>([
+              connection,
+              ended.then<Socket>(
+                (code) => throw StateError('mGBA encerrou ($code). $_logs'),
+              ),
+            ])
+          : connection;
+      _socket = await ready.timeout(const Duration(seconds: 15));
       if (_stopping) {
         // The dialog closed while Dart was starting. Release the child's
         // connection so it can finish restoring/flushing and drop its lock.
@@ -174,7 +226,18 @@ class SameBoyLiveService {
       }
       _socket!.setOption(SocketOption.tcpNoDelay, true);
       _subscription = _socket!.listen(
-        (data) => parser.add(data, onFrame),
+        (data) {
+          if (!_gba) {
+            parser.add(data, onFrame);
+            return;
+          }
+          try {
+            _gbaVideo.add(data, onFrame);
+          } on FormatException catch (error) {
+            onError(error.message);
+            _socket?.destroy();
+          }
+        },
         onError: (Object error) {
           if (!_stopping) onError('Falha na transmissão de video: $error');
         },
@@ -256,7 +319,7 @@ class SameBoyLiveService {
       await _release();
     } on TimeoutException {
       // Both cartridges are still owned by this helper until it exits.
-      if (linkRomPath != null) _shutdown = null;
+      if (_gba || linkRomPath != null) _shutdown = null;
       rethrow;
     }
   }
@@ -279,12 +342,13 @@ class SameBoyLiveService {
         );
       }
     }
+    await _gbaLogsDone;
     await _outSubscription?.cancel();
     await _errSubscription?.cancel();
     _process = null;
-    if (linkRomPath != null && exitCode != null && exitCode != 0) {
+    if ((_gba || linkRomPath != null) && exitCode != null && exitCode != 0) {
       throw StateError(
-        'O auxiliar Link Cable encerrou com código $exitCode. $_logs',
+        'O auxiliar ${_gba ? 'mGBA' : 'Link Cable'} encerrou com código $exitCode. $_logs',
       );
     }
   }

@@ -12,9 +12,10 @@ class SameBoyAudioOutput {
             Int32 Function(Pointer<Int16>, Size),
             int Function(Pointer<Int16>, int)
           >('audio_write'),
-      _setVolume = library.lookupFunction<Int32 Function(Uint32), int Function(int)>(
-        'audio_set_volume',
-      ),
+      _setVolume = library
+          .lookupFunction<Int32 Function(Uint32), int Function(int)>(
+            'audio_set_volume',
+          ),
       _close = library.lookupFunction<Void Function(), void Function()>(
         'audio_close',
       );
@@ -25,8 +26,15 @@ class SameBoyAudioOutput {
   final Pointer<Int16> _pair = calloc<Int16>(2);
   int _error = 0;
 
-  static SameBoyAudioOutput? open(double sampleRate) {
-    if (sampleRate != 48000) {
+  static SameBoyAudioOutput? open(
+    double sampleRate, {
+    bool useCoreRate = false,
+  }) {
+    if (!sampleRate.isFinite ||
+        sampleRate < 8000 ||
+        sampleRate > 192000 ||
+        sampleRate != sampleRate.roundToDouble() ||
+        (!useCoreRate && sampleRate != 48000)) {
       stderr.writeln('Audio desativado: taxa do nucleo $sampleRate Hz.');
       return null;
     }
@@ -38,14 +46,18 @@ class SameBoyAudioOutput {
         'audio_open',
       );
       final output = SameBoyAudioOutput._(library);
-      final hr = open();
+      final hr = useCoreRate
+          ? library.lookupFunction<Int32 Function(Uint32), int Function(int)>(
+              'audio_open_at_rate',
+            )(sampleRate.toInt())
+          : open();
       if (hr < 0) {
         output.close();
         throw StateError(
           'XAudio2 HRESULT 0x${hr.toUnsigned(32).toRadixString(16)}',
         );
       }
-      stdout.writeln('XAudio2 ativo: PCM estereo, 48000 Hz.');
+      stdout.writeln('XAudio2 ativo: PCM estereo, ${sampleRate.toInt()} Hz.');
       return output;
     } catch (error) {
       stderr.writeln('Audio desativado: $error');
@@ -66,6 +78,14 @@ class SameBoyAudioOutput {
 
   void setVolume(int percent) {
     if (_error >= 0) _error = _setVolume(percent.clamp(0, 100));
+  }
+
+  void discard() {
+    if (_error < 0) return;
+    final path = Platform.environment['BEASTEMU_AUDIO_DLL'];
+    if (path == null) return;
+    _error = DynamicLibrary.open(path)
+        .lookupFunction<Int32 Function(), int Function()>('audio_discard')();
   }
 
   void sample(int left, int right) {
