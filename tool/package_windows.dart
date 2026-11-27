@@ -58,6 +58,9 @@ Future<void> main() async {
   await copy('docs/mGBA-LICENSE.txt', 'licenses/mGBA.txt');
   await copy('docs/mGBA-inih.txt', 'licenses/mGBA-inih.txt');
   await copy('docs/gba-dev.md', 'GBA-DEV.md');
+  await copy('docs/gba-candidato.md', 'AVALIACAO.md');
+  await copy('docs/gba-candidato.md', 'LEIA-ME.md');
+  await copy('docs/mGBA-fontes.md', 'licenses/mGBA-FONTES.md');
   await copy('LICENSE', 'LICENSE');
   await copy('MARCA.md', 'MARCA.md');
   await copy('docs/SameBoy-LICENSE.txt', 'licenses/SameBoy.txt');
@@ -89,7 +92,6 @@ Future<void> main() async {
     '${flutter.path}/bin/cache/pkg/sky_engine/LICENSE',
     'licenses/Flutter-Engine.txt',
   );
-  await copy('docs/windows-portatil.md', 'LEIA-ME.md');
 
   final helpers = await Directory('${stage.path}/helpers').create();
   for (final item in {

@@ -1,5 +1,7 @@
 # BeastEmu
 
+O candidato local integrado GB/GBC/GBA está descrito no [roteiro de avaliação e preservação de dados](docs/gba-candidato.md), com perfis isolados, pendências manuais e proposta de versão futura. O proprietário aprovou manualmente a GBA 04. Este candidato permanece em avaliação.
+
 **Branch de desenvolvimento GBA para Windows x64.** Para compilar, gerar o cartucho de demonstração e testar o mGBA com um perfil separado, siga o [guia do marco experimental](docs/gba-dev.md). A descrição da beta GB/GBC aparece abaixo.
 
 <img src="assets/brand/logo-horizontal.png" width="333" alt="BeastEmu · Beast Edition">
