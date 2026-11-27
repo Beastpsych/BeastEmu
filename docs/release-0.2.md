@@ -10,16 +10,16 @@ Rascunho local de pré-release. Build `0.2.0-beta.1+4`, versão Windows `0.2.0.4
 
 O instalador não possui assinatura Authenticode. As distribuições não incluem ROMs comerciais nem BIOS proprietário. O código autoral usa MIT, a marca segue política própria e mGBA conserva MPL 2.0 com identificação da revisão e dos fontes correspondentes.
 
-Consulte o [guia de atualização e importação](https://github.com/Beastpsych/BeastEmu/blob/release/0.2.0-beta.1/docs/beta-0.2.md), os [créditos](https://github.com/Beastpsych/BeastEmu/blob/release/0.2.0-beta.1/docs/terceiros.md), a [licença MIT](https://github.com/Beastpsych/BeastEmu/blob/release/0.2.0-beta.1/LICENSE) e a [política de marca](https://github.com/Beastpsych/BeastEmu/blob/release/0.2.0-beta.1/MARCA.md). Esses links dependem da futura disponibilização da branch. Antes da publicação, substitua a referência pela tag aprovada e inclua os hashes dos artefatos efetivamente anexados.
+Consulte o [guia de atualização e importação](https://github.com/Beastpsych/BeastEmu/blob/v0.2.0-beta.1/docs/beta-0.2.md), os [créditos](https://github.com/Beastpsych/BeastEmu/blob/v0.2.0-beta.1/docs/terceiros.md), a [licença MIT](https://github.com/Beastpsych/BeastEmu/blob/v0.2.0-beta.1/LICENSE) e a [política de marca](https://github.com/Beastpsych/BeastEmu/blob/v0.2.0-beta.1/MARCA.md). Esses links ficam disponíveis quando a tag aprovada for publicada.
 
-O proprietário informou validação manual do desenvolvimento GBA. O ciclo público de atualização 0.1.1 → 0.2, importação opcional de dados reais e validação em outro computador permanecem pendentes. Testes automatizados usam cartuchos sintéticos e dados temporários.
+O proprietário confirmou dez testes manuais, incluindo GB/GBC/GBA, Pokémon FireRed e Emerald, controles, saves, estados, áudio, RTC, aceleração e testes externos. Esses resultados são informados pelo proprietário. O ciclo público específico de atualização 0.1.1 → 0.2, desinstalação e reinstalação permanece pendente de execução em ambiente descartável. A importação opcional de dados pessoais reais exige backup e autorização. Testes automatizados usam cartuchos sintéticos e dados temporários.
 
 ## Pacotes preparados localmente
 
 | Arquivo | SHA-256 |
 |---|---|
-| `BeastEmu-0.2.0-beta.1+4-Windows-x64-Setup.exe` | `43B765E813A78F09256943442586CCEB209CB4004093A260C03E4B6DB2049CC2` |
-| `BeastEmu-0.2.0-beta.1+4-Windows-x64-Portable.zip` | `EF6B0BCBCF151EEF78505AD0E64FF549C5FCDB63177A1F9BCC08FBAB04D46444` |
+| `BeastEmu-0.2.0-beta.1+4-Windows-x64-Setup.exe` | `C038F92141668DCAFA1C91CCBC3978DC3FE279B65AF80B958836300158F838A8` |
+| `BeastEmu-0.2.0-beta.1+4-Windows-x64-Portable.zip` | `BF2385CE45B4ACEBA794ABE45CE6A58BF8C675CBAB76C3A4FCE20572484ACA03` |
 
 Recalcule essas somas se os arquivos forem recompilados ou assinados. O arquivo `SHA256SUMS.txt` acompanha os artefatos locais.
 

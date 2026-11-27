@@ -33,7 +33,7 @@ $vc = [version](Read-Setting 'build/windows/x64/CMakeCache.txt' '(?im)^CMAKE_LIN
 $runtime = @(
     $exe, 'beastemu_audio.dll', 'flutter_windows.dll', 'dartjni.dll',
     'helpers\mgba-live.exe', 'cores\windows\mgba_libretro.dll',
-    'GBA-DEV.md', 'BETA-0.2.md', 'AVALIACAO.md', 'licenses\mGBA.txt', 'licenses\mGBA-inih.txt', 'licenses\mGBA-FONTES.md',
+    'GBA-DEV.md', 'BETA-0.2.md', 'validacao-final-0.2.md', 'AVALIACAO.md', 'licenses\mGBA.txt', 'licenses\mGBA-inih.txt', 'licenses\mGBA-FONTES.md',
     'helpers\sameboy-live.exe', 'helpers\sameboy-preview.exe', 'cores\windows\sameboy_libretro.dll',
     'data\app.so', 'data\icudtl.dat', 'data\flutter_assets\AssetManifest.bin',
     'data\flutter_assets\FontManifest.json', 'data\flutter_assets\NativeAssetsManifest.json',

@@ -117,4 +117,4 @@ foreach ($entry in $manifest) {
     if (Test-Path -LiteralPath (Join-Path $app $entry.path)) { throw "Arquivo instalado remanescente: $($entry.path)" }
 }
 Assert-UserData
-Write-Output 'Instalação, atalhos, abertura, reinstalação, integridade e desinstalação aprovados no perfil descartável.'
+Write-Output 'Smoke test de instalação, atalhos, abertura, reinstalação e desinstalação concluído com marcadores. A leitura de progresso real e o ciclo definitivo exigem docs/validacao-final-0.2.md.'

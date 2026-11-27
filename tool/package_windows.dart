@@ -59,6 +59,7 @@ Future<void> main() async {
   await copy('docs/mGBA-inih.txt', 'licenses/mGBA-inih.txt');
   await copy('docs/gba-dev.md', 'GBA-DEV.md');
   await copy('docs/beta-0.2.md', 'BETA-0.2.md');
+  await copy('docs/validacao-final-0.2.md', 'validacao-final-0.2.md');
   await copy('docs/beta-0.2.md', 'AVALIACAO.md');
   await copy('docs/windows-portatil.md', 'LEIA-ME.md');
   await copy('docs/mGBA-fontes.md', 'licenses/mGBA-FONTES.md');

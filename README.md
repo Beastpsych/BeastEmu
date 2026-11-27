@@ -2,6 +2,8 @@
 
 O candidato local **0.2.0-beta.1+4** integra GB, GBC e GBA. O roteiro de atualização e de importação opcional está no [guia da beta 0.2](docs/beta-0.2.md). A beta pública anterior permanece em [v0.1.1-beta.1](https://github.com/Beastpsych/BeastEmu/releases/tag/v0.1.1-beta.1).
 
+O proprietário confirmou dez testes manuais, incluindo FireRed, Emerald, áudio, RTC, controles, saves e testes externos. O ciclo específico de atualização pública 0.1.1 → 0.2, desinstalação e reinstalação ainda depende de execução em ambiente descartável. [Registro de validação e publicação](docs/validacao-final-0.2.md).
+
 <img src="assets/brand/logo-horizontal.png" width="333" alt="BeastEmu · Beast Edition">
 
 Emulador de Game Boy, Game Boy Color e Game Boy Advance para Windows x64, com interface Beast Edition em português. GB/GBC usam SameBoy Libretro e GBA usa mGBA Libretro. A versão 0.2 está em preparação local.

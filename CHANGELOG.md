@@ -8,7 +8,7 @@
 - Preserva a biblioteca e os formatos de saves e estados GB/GBC da beta 0.1.1.
 - Mantém o AppId público e a pasta de instalação. GBA Dev continua com identidade própria.
 - Inclui avisos MPL 2.0 e identificação dos fontes do mGBA, roteiro de atualização e importação manual opcional com backup e validação.
-- A validação manual do upgrade público e de outro computador está pendente. Link Cable Local permanece experimental e exclusivo de GB/GBC.
+- O proprietário confirmou dez testes manuais, incluindo FireRed, Emerald e testes externos. O ciclo específico de upgrade público, desinstalação e reinstalação permanece pendente em ambiente descartável. Link Cable Local continua experimental e exclusivo de GB/GBC.
 
 ## 0.1.1-beta.1 · build 3
 
