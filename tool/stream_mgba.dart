@@ -74,6 +74,7 @@ Future<void> main(List<String> args) async {
     var width = 0, height = 0;
     var format = LibretroPixelFormat.rgb1555;
     var frame = 0, samples = 0;
+    var speed = 1;
     String? videoError;
     Uint8List? rgba;
 
@@ -103,7 +104,7 @@ Future<void> main(List<String> args) async {
       int h,
       int pitch,
     ) {
-      if (data == nullptr || pending || frame.isOdd) return;
+      if (data == nullptr || pending || frame % (2 * speed) != 0) return;
       if (w != width ||
           h != height ||
           pitch < w * format.bytesPerPixel ||
@@ -127,7 +128,7 @@ Future<void> main(List<String> args) async {
       int frames,
     ) {
       samples += frames;
-      audio?.batch(pcm, frames);
+      if (speed == 1) audio?.batch(pcm, frames);
       return frames;
     }, exceptionalReturn: 0);
     cleanup.add(batch.close);
@@ -136,7 +137,7 @@ Future<void> main(List<String> args) async {
       int r,
     ) {
       samples++;
-      audio?.sample(l, r);
+      if (speed == 1) audio?.sample(l, r);
     });
     cleanup.add(sample.close);
     final poll = NativeCallable<InputPollNative>.isolateLocal(() {});
@@ -242,24 +243,47 @@ Future<void> main(List<String> args) async {
       ..setUint16(2, height, Endian.little);
     peer.add(header.buffer.asUint8List());
     audio = SameBoyAudioOutput.open(rate, useCoreRate: true);
-    audio?.setVolume(
-      int.tryParse(Platform.environment[sameBoyVolumeEnvironment] ?? '') ?? 100,
-    );
+    var volume =
+        int.tryParse(Platform.environment[sameBoyVolumeEnvironment] ?? '') ??
+        100;
+    audio?.setVolume(volume);
+    final clock = Stopwatch()..start();
+    var deadline = 0;
+    var segmentStart = 0, segmentFrames = 0;
+    void reportSpeed() {
+      stdout.writeln(
+        'GBA_SPEED ${jsonEncode({'speed': speed, 'frames': frame - segmentFrames, 'us': clock.elapsedMicroseconds - segmentStart, 'volume': speed == 1 ? volume : 0})}',
+      );
+    }
+
     commands = stdin.listen(
       (bytes) {
         for (final byte in bytes) {
+          if (byte >= speedNormal &&
+              byte <= speedQuad &&
+              speed != byte - speedNormal + 1) {
+            reportSpeed();
+            speed = byte - speedNormal + 1;
+            segmentStart = clock.elapsedMicroseconds;
+            segmentFrames = frame;
+            deadline = segmentStart;
+            audio?.discard();
+            audio?.setVolume(speed == 1 ? volume : 0);
+          }
           if (isStateCommand(byte)) stateCommand ??= byte;
         }
-        final volume = latestVolume(bytes);
-        if (volume != null) audio?.setVolume(volume);
+        final value = latestVolume(bytes);
+        if (value != null) {
+          volume = value;
+          audio?.setVolume(speed == 1 ? volume : 0);
+        }
       },
       onDone: () => running = false,
       onError: (Object _) => running = false,
     );
     final run = lib.lookupFunction<RetroRunNative, RetroRunDart>('retro_run');
     final interval = (1000000 / fps).round();
-    final clock = Stopwatch()..start();
-    var deadline = 0;
+    var nextSave = const Duration(seconds: 5).inMicroseconds;
     while (running) {
       rgba = null;
       run();
@@ -307,15 +331,22 @@ Future<void> main(List<String> args) async {
         );
       }
       frame++;
-      if (frame == 1 || frame % 300 == 0) save.tick();
-      deadline += interval;
-      if (clock.elapsedMicroseconds - deadline > interval * 3) {
+      if (clock.elapsedMicroseconds >= nextSave) {
+        save.tick();
+        nextSave =
+            clock.elapsedMicroseconds +
+            const Duration(seconds: 5).inMicroseconds;
+      }
+      final period = interval ~/ speed;
+      deadline += period;
+      if (clock.elapsedMicroseconds - deadline > period * 3) {
         deadline = clock.elapsedMicroseconds;
       }
       await Future<void>.delayed(
         Duration(microseconds: deadline - clock.elapsedMicroseconds),
       );
     }
+    reportSpeed();
     final finishing = save;
     save = null;
     await finishing.close(flush: true);

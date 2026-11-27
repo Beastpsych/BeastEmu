@@ -80,6 +80,14 @@ class SameBoyAudioOutput {
     if (_error >= 0) _error = _setVolume(percent.clamp(0, 100));
   }
 
+  void discard() {
+    if (_error < 0) return;
+    final path = Platform.environment['BEASTEMU_AUDIO_DLL'];
+    if (path == null) return;
+    _error = DynamicLibrary.open(path)
+        .lookupFunction<Int32 Function(), int Function()>('audio_discard')();
+  }
+
   void sample(int left, int right) {
     _pair[0] = left;
     _pair[1] = right;

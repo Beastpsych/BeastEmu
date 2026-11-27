@@ -92,6 +92,7 @@ void main() {
           }
 
           await red.future.timeout(const Duration(seconds: 10));
+          process.stdin.add([speedDouble]);
           expect((await send(listStateSlots))['slots'], List.filled(5, null));
           expect((await send(quickLoad))['empty'], isTrue);
           expect((await send(loadStateBase + 1))['error'], isNotNull);
@@ -110,6 +111,7 @@ void main() {
             hasLength(5),
           );
           socket.add([0, 1]);
+          process.stdin.add([speedTriple]);
           await green.future.timeout(const Duration(seconds: 10));
           socket.add([0, 0]);
           await socket.flush();
@@ -119,7 +121,9 @@ void main() {
           expect(restored['protected'], isTrue);
           await restoredRed.future.timeout(const Duration(seconds: 10));
           expect((await send(quickLoad))['error'], isNull);
+          process.stdin.add([speedQuad]);
           expect((await send(quickSave))['error'], isNull);
+          process.stdin.add([speedNormal]);
           final restoredSnapshot = await File('${states.path}/quick.state')
               .readAsBytes();
           final restoredHeader = ByteData.sublistView(restoredSnapshot);

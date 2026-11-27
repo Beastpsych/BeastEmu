@@ -32,6 +32,7 @@ struct EngineEvents final : IXAudio2EngineCallback {
   void STDMETHODCALLTYPE OnCriticalError(HRESULT hr) override { error.store(hr); }
 } events;
 bool registered = false;
+WAVEFORMATEX sessionFormat{};
 
 void submitBlock() {
   XAUDIO2_VOICE_STATE state{};
@@ -86,7 +87,20 @@ API HRESULT audio_open_at_rate(uint32_t rate) {
   format.wBitsPerSample = 16;
   format.nBlockAlign = 4;
   format.nAvgBytesPerSec = format.nSamplesPerSec * format.nBlockAlign;
+  sessionFormat = format;
   return engine->CreateSourceVoice(&source, &format);
+}
+
+// DestroyVoice waits for the audio worker to release the borrowed slots.
+// Recreate only the source, so no old or partial PCM survives a speed change.
+API HRESULT audio_discard() {
+  if (!source || !engine) return E_UNEXPECTED;
+  source->DestroyVoice();
+  source = nullptr;
+  filled = 0;
+  next = 0;
+  started = false;
+  return engine->CreateSourceVoice(&source, &sessionFormat);
 }
 
 API HRESULT audio_open() { return audio_open_at_rate(48000); }

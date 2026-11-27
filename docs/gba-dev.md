@@ -53,9 +53,19 @@ Os arquivos ficam em `%LOCALAPPDATA%\BeastEmu-GBA-Dev\BeastEmu\states\mgba\<SHA-
 
 Nesta revisão, `retro_serialize_size` pode variar com a memória detectada. `retro_serialize` inclui SAVEDATA e RTC, enquanto `retro_unserialize` chama o carregador com RTC. Por isso o BeastEmu armazena também uma cópia explícita da memória de cartucho e a repõe após restaurar o estado nativo. Os testes exercitam a DLL local com cartuchos ARM sintéticos. A compatibilidade exige a mesma DLL e versão. [Fonte correspondente](https://github.com/libretro/mgba/blob/7a12d6d4b9acb14c0ae62c9166b6a2f3d08007f6/src/platform/libretro/libretro.c)
 
-Antes de carregar um estado válido, o auxiliar confirma o save normal atual e suspende a gravação periódica e final do cartucho até encerrar a sessão. O aviso **Cartucho protegido** permanece visível. Guarde os avanços dessa sessão nos slots ou no estado rápido. Ao reabrir normalmente o jogo, o cartucho retoma o save normal preservado. Para continuar a outra linha de progresso, carregue seu estado novamente. Aceleração e multiplayer GBA continuam fora desta etapa.
+Antes de carregar um estado válido, o auxiliar confirma o save normal atual e suspende a gravação periódica e final do cartucho até encerrar a sessão. O aviso **Cartucho protegido** permanece visível. Guarde os avanços dessa sessão nos slots ou no estado rápido. Ao reabrir normalmente o jogo, o cartucho retoma o save normal preservado. Para continuar a outra linha de progresso, carregue seu estado novamente. Multiplayer GBA continua fora desta etapa.
 
 Para validar manualmente, salve pelo menu do jogo, crie um slot, avance e carregue o slot. Confira imagem, controles e áudio. Guarde um novo estado após avançar, feche completamente o aplicativo e reabra. Confira tanto o save normal quanto a recuperação do estado. Repita em tela cheia e com F5/F9.
+
+## Aceleração e atalhos GBA
+
+A barra permite percorrer 1×, 2×, 3× e 4×. F8 faz a mesma seleção. Tab mantém 4× enquanto pressionada e devolve a velocidade selecionada ao soltar ou perder foco. F5/F9 operam o estado rápido, M alterna mudo e F11 alterna tela cheia. As teclas seguem os mapeamentos persistentes e a resolução de conflitos das Configurações.
+
+O auxiliar agenda chamadas reais a `retro_run` segundo a frequência nominal do mGBA dividida pela velocidade selecionada. A apresentação permanece limitada, o loop cede ao sistema entre quadros e o checkpoint do cartucho continua a cada cinco segundos de tempo real. A velocidade alcançada depende da máquina e da ROM.
+
+Acima de 1× o auxiliar consome os callbacks de áudio sem enfileirar PCM. Em cada mudança de velocidade descarta a voz e os blocos parciais, recria somente a voz estéreo na taxa anunciada pelo mGBA e aplica o volume efetivo. Isso impede reprodução acumulada ao voltar a 1×. O mudo do usuário permanece independente da aceleração. Estalos e qualidade percebida ainda precisam da validação manual em jogos.
+
+Os testes medem `retro_run` por tempo real com ROM sintética, exercitam estados nas velocidades aceleradas e verificam os saves após reiniciar. Para validar manualmente, selecione cada velocidade, mantenha e solte Tab, alterne mudo, perca o foco e retorne a 1×. Confira áudio, L/R, slots e o save normal após fechar e reabrir.
 
 ## Créditos
 

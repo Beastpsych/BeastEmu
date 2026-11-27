@@ -181,7 +181,7 @@ void main() {
       );
       expect(find.text('Salvar estado'), findsOneWidget);
       expect(find.text('Carregar estado'), findsOneWidget);
-      expect(find.text('Acelerar'), findsNothing);
+      expect(find.text('Acelerar'), findsOneWidget);
       await tester.sendKeyDownEvent(LogicalKeyboardKey.keyQ);
       await tester.sendKeyDownEvent(LogicalKeyboardKey.keyE);
       expect(session.masks.last, (1 << 10) | (1 << 11));
@@ -193,7 +193,18 @@ void main() {
       await tester.sendKeyEvent(LogicalKeyboardKey.f9);
       await tester.sendKeyEvent(LogicalKeyboardKey.f8);
       expect(session.commands, [quickSave, quickLoad]);
-      expect(session.speeds, isEmpty);
+      expect(session.speeds, [2]);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.tab);
+      await _update(tester);
+      expect(find.text('4×'), findsOneWidget);
+      await tester.sendKeyRepeatEvent(LogicalKeyboardKey.tab);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.tab);
+      expect(session.speeds, [2, 4, 2]);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.tab);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+      expect(session.speeds, [2, 4, 2, 4, 2]);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.tab);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
       await tester.tap(find.byTooltip('Fechar'));
       await _update(tester);
       expect(session.stops, 1);

@@ -275,7 +275,7 @@ class SameBoyLiveService {
   int _speed = 1;
   void setSpeed(int speed) {
     RangeError.checkValueInInterval(speed, 1, 4, 'speed');
-    if (_gba || linkRomPath != null || _speed == speed || _stopping) return;
+    if (linkRomPath != null || _speed == speed || _stopping) return;
     _speed = speed;
     _commands?.add([speedNormal + speed - 1]);
   }

@@ -49,7 +49,7 @@ class SameBoyLiveDialog extends StatefulWidget {
 
 class _SameBoyLiveDialogState extends State<SameBoyLiveDialog> {
   bool get _gba => coreForPath(widget.romPath) == CartridgeCore.mgba;
-  bool get _singleSameBoy => !_dual && !_gba;
+  bool get _singleSameBoy => !_dual;
   bool get _singleSession => !_dual;
   bool get _dual => widget.partner != null;
   late final _service =
@@ -607,6 +607,25 @@ class _SameBoyLiveDialogState extends State<SameBoyLiveDialog> {
                   onPressed: _closing ? null : _showSettings,
                   icon: const Icon(Icons.tune),
                 ),
+                if (_gba)
+                  IconButton(
+                    tooltip: widget.settings.muted
+                        ? 'Ativar áudio'
+                        : 'Silenciar áudio',
+                    onPressed: _closing
+                        ? null
+                        : () {
+                            unawaited(
+                              widget.settings.setMuted(!widget.settings.muted),
+                            );
+                            _focus.requestFocus();
+                          },
+                    icon: Icon(
+                      widget.settings.muted
+                          ? Icons.volume_off
+                          : Icons.volume_up,
+                    ),
+                  ),
                 Tooltip(
                   message: 'Fechar',
                   child: TextButton.icon(
