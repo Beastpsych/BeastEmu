@@ -23,6 +23,7 @@ class MgbaSave {
   late Uint8List _initial;
   Future<void>? _pending;
   Object? _failure;
+  bool _protectedByState = false;
 
   static Future<MgbaSave> attach(
     DynamicLibrary lib,
@@ -275,7 +276,7 @@ class MgbaSave {
   }
 
   void tick() {
-    if (_failure != null || _pending != null) return;
+    if (_protectedByState || _failure != null || _pending != null) return;
     _pending = _checkpoint(finalCheck: false)
         .catchError((Object error) {
           _failure = error;
@@ -288,9 +289,22 @@ class MgbaSave {
     try {
       await _pending;
       if (_failure case final error?) throw StateError('Falha no save: $error');
-      if (flush) await _checkpoint(finalCheck: true);
+      if (flush && !_protectedByState) await _checkpoint(finalCheck: true);
     } finally {
       await lock.close();
     }
+  }
+
+  /// Stores the current normal-cartridge timeline before a state load and
+  /// stops periodic/final writes from publishing the older restored bytes.
+  /// A state session remains usable, while the on-disk cartridge stays at
+  /// the latest confirmed normal save until a new session begins.
+  Future<void> protectBeforeStateLoad() async {
+    if (_protectedByState) return;
+    await _pending;
+    if (_failure case final error?) throw StateError('Falha no save: $error');
+    await _checkpoint(finalCheck: true);
+    _protectedByState = true;
+    report('Cartucho protegido após carregar estado');
   }
 }

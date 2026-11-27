@@ -54,8 +54,7 @@ class SameBoyLiveService {
 
   Future<List<String?>> stateCommand(int byte) {
     final commands = _commands;
-    if (_gba ||
-        linkRomPath != null ||
+    if (linkRomPath != null ||
         !isStateCommand(byte) ||
         commands == null ||
         _stopping ||
@@ -163,7 +162,7 @@ class SameBoyLiveService {
           if ((profileRoot?.path ?? Platform.environment['LOCALAPPDATA'])
               case final local?)
             'LOCALAPPDATA': '$local/BeastEmu-GBA-Dev',
-          sameBoyCommandEnvironment: !_gba && partner == null ? '1' : '0',
+          sameBoyCommandEnvironment: partner == null ? '1' : '0',
           expectedRomEnvironment: expectedRomHash ?? '',
           sameBoyVolumeEnvironment: launchVolume.toString(),
           'BEASTEMU_AUDIO_DLL':

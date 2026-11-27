@@ -38,12 +38,24 @@ Depois de `retro_load_game`, a DLL fornece um ponteiro de SAVE_RAM com até 131.
 
 Cada ROM tem um diretório em `%LOCALAPPDATA%\BeastEmu-GBA-Dev\BeastEmu\saves\mgba\<SHA-256 da ROM>\`. O índice `cart.json` identifica a imagem atual e a anterior. Cada arquivo `<SHA-256 do conteúdo>.sav` contém os bytes brutos do cartucho no tamanho detectado. Para fazer backup, feche a sessão e copie a pasta inteira. Cópias idênticas e arquivos renomeados usam o mesmo diretório. A sessão mantém um bloqueio exclusivo até o fechamento. O auxiliar confere alterações a cada 300 quadros (aproximadamente cinco segundos) e ao sair. Escreve e verifica a imagem temporária antes de publicar o índice por renomeação no mesmo volume. Uma interrupção pode deixar um arquivo temporário ou uma imagem sem referência. Ao reabrir, vale a última geração confirmada pelo índice.
 
-Um save inválido, uma alteração externa ou um tamanho incompatível gera um erro. Preserve a pasta para recuperação. Para restaurar um backup da pasta, primeiro feche todas as sessões e guarde uma cópia dos arquivos atuais. Buffers totalmente FF ou zero nunca substituem progresso válido. Esse cuidado também impede a persistência de um apagamento integral intencional do cartucho. O RTC do GBA não tem região independente exposta por esta DLL. A validação cobre os dados EEPROM, SRAM e Flash. Save states, aceleração e multiplayer GBA continuam indisponíveis.
+Um save inválido, uma alteração externa ou um tamanho incompatível gera um erro. Preserve a pasta para recuperação. Para restaurar um backup da pasta, primeiro feche todas as sessões e guarde uma cópia dos arquivos atuais. Buffers totalmente FF ou zero nunca substituem progresso válido. Esse cuidado também impede a persistência de um apagamento integral intencional do cartucho. O RTC do GBA não tem região independente exposta por esta DLL. A validação cobre os dados EEPROM, SRAM e Flash. Consulte abaixo o comportamento dos estados GBA.
 
 ### Conferir o progresso com um cartucho de teste
 
 Na raiz desta cópia, execute `dart test/support/gba_save_rom.dart 32768 build/Progresso-SRAM.gba` com um destino novo. Os outros tamanhos aceitos são 512, 8192, 65536 e 131072. Importe o arquivo e inicie o jogo. Vermelho significa que o cartucho ainda não contém o marcador. Pressione A para gravar. O programa lê o marcador e pinta a tela de verde. Saia da sessão, feche o BeastEmu, abra novamente e entre no jogo. A tela deve ficar verde antes de pressionar qualquer botão. Com um homebrew que ofereça menu de save, guarde uma posição identificável pelo próprio menu e confira essa posição após reiniciar.
 
+
+## Estados GBA
+
+Durante o jogo, **Salvar estado** e **Carregar estado** abrem os cinco slots por ROM, com data e horário e confirmação de substituição. F5 salva o estado rápido e F9 carrega. As teclas seguem as preferências já existentes em Configurações e respeitam os mapeamentos personalizados. Uma tecla mantida pressionada executa a ação uma vez. O arquivo rápido é independente dos cinco slots.
+
+Os arquivos ficam em `%LOCALAPPDATA%\BeastEmu-GBA-Dev\BeastEmu\states\mgba\<SHA-256 da ROM>\`, com nomes `1.state` a `5.state` e `quick.state`. O formato BGA1 identifica ROM, DLL, versão mGBA, slot, horário UTC, comprimentos e checksum SHA-256. A escrita usa temporário verificado e renomeação. Arquivos incompatíveis são preservados. O menu recusa sobrescrevê-los.
+
+Nesta revisão, `retro_serialize_size` pode variar com a memória detectada. `retro_serialize` inclui SAVEDATA e RTC, enquanto `retro_unserialize` chama o carregador com RTC. Por isso o BeastEmu armazena também uma cópia explícita da memória de cartucho e a repõe após restaurar o estado nativo. Os testes exercitam a DLL local com cartuchos ARM sintéticos. A compatibilidade exige a mesma DLL e versão. [Fonte correspondente](https://github.com/libretro/mgba/blob/7a12d6d4b9acb14c0ae62c9166b6a2f3d08007f6/src/platform/libretro/libretro.c)
+
+Antes de carregar um estado válido, o auxiliar confirma o save normal atual e suspende a gravação periódica e final do cartucho até encerrar a sessão. O aviso **Cartucho protegido** permanece visível. Guarde os avanços dessa sessão nos slots ou no estado rápido. Ao reabrir normalmente o jogo, o cartucho retoma o save normal preservado. Para continuar a outra linha de progresso, carregue seu estado novamente. Aceleração e multiplayer GBA continuam fora desta etapa.
+
+Para validar manualmente, salve pelo menu do jogo, crie um slot, avance e carregue o slot. Confira imagem, controles e áudio. Guarde um novo estado após avançar, feche completamente o aplicativo e reabra. Confira tanto o save normal quanto a recuperação do estado. Repita em tela cheia e com F5/F9.
 
 ## Créditos
 

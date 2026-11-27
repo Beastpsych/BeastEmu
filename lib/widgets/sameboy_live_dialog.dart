@@ -50,6 +50,7 @@ class SameBoyLiveDialog extends StatefulWidget {
 class _SameBoyLiveDialogState extends State<SameBoyLiveDialog> {
   bool get _gba => coreForPath(widget.romPath) == CartridgeCore.mgba;
   bool get _singleSameBoy => !_dual && !_gba;
+  bool get _singleSession => !_dual;
   bool get _dual => widget.partner != null;
   late final _service =
       widget.service ??
@@ -216,7 +217,7 @@ class _SameBoyLiveDialogState extends State<SameBoyLiveDialog> {
   bool _quickBusy = false;
   Future<void> _quickState(bool save) async {
     if (_quickBusy ||
-        !_singleSameBoy ||
+        !_singleSession ||
         _image == null ||
         _error != null ||
         _closing) {
@@ -484,7 +485,7 @@ class _SameBoyLiveDialogState extends State<SameBoyLiveDialog> {
       switch (action) {
         case EmulatorShortcut.quickSave:
         case EmulatorShortcut.quickLoad:
-          if (_singleSameBoy) {
+          if (_singleSession) {
             unawaited(_quickState(action == EmulatorShortcut.quickSave));
           }
         case EmulatorShortcut.mute:
@@ -549,7 +550,7 @@ class _SameBoyLiveDialogState extends State<SameBoyLiveDialog> {
                       ),
                     ),
                   ),
-                if (_singleSameBoy)
+                if (_singleSession)
                   for (final action in StateSlotAction.values)
                     TextButton.icon(
                       onPressed: _closing || _image == null || _error != null

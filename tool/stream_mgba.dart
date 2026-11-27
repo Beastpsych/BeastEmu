@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:ffi';
 import 'dart:io';
 import 'dart:typed_data';
@@ -16,6 +17,7 @@ import 'inspect_sameboy.dart'
 import 'libretro_abi.dart';
 import 'sameboy_audio_output.dart';
 import 'mgba_save.dart';
+import 'mgba_states.dart';
 
 Future<void> main(List<String> args) async {
   final arena = Arena();
@@ -36,7 +38,8 @@ Future<void> main(List<String> args) async {
     }
     final rom = await file.readAsBytes();
     gbaTitle(rom);
-    final romId = sha256.convert(rom).toString();
+    final romHash = sha256.convert(rom);
+    final romId = romHash.toString();
     final expected = Platform.environment[expectedRomEnvironment];
     if (expected != null && expected.isNotEmpty && romId != expected) {
       throw const FormatException(
@@ -63,6 +66,9 @@ Future<void> main(List<String> args) async {
       throw StateError('ABI ou formato de conteúdo incompatível.');
     }
     final input = JoypadPackets(dual: false);
+    MgbaStates? states;
+    int? stateCommand;
+    var cartridgeProtected = false;
     var running = true;
     var pending = false;
     var width = 0, height = 0;
@@ -241,6 +247,9 @@ Future<void> main(List<String> args) async {
     );
     commands = stdin.listen(
       (bytes) {
+        for (final byte in bytes) {
+          if (isStateCommand(byte)) stateCommand ??= byte;
+        }
         final volume = latestVolume(bytes);
         if (volume != null) audio?.setVolume(volume);
       },
@@ -255,6 +264,38 @@ Future<void> main(List<String> args) async {
       rgba = null;
       run();
       if (videoError != null) throw StateError(videoError!);
+      final command = stateCommand;
+      if (command != null) {
+        stateCommand = null;
+        final reply = <String, Object?>{'command': command};
+        try {
+          final local = Platform.environment['LOCALAPPDATA'];
+          if (local == null || local.isEmpty) {
+            throw StateError('LOCALAPPDATA indisponível.');
+          }
+          final store = states ??= MgbaStates(
+            lib,
+            romHash,
+            core,
+            info.ref.libraryVersion.toDartString(),
+            Directory('$local/BeastEmu/states/mgba'),
+          );
+          if (command == listStateSlots) {
+            reply['slots'] = await store.list();
+          } else {
+            await store.execute(command, () async {
+              await save!.protectBeforeStateLoad();
+              cartridgeProtected = true;
+            });
+          }
+        } on EmptyQuickSlot {
+          reply['empty'] = true;
+        } catch (error) {
+          reply['error'] = error.toString();
+        }
+        reply['protected'] = cartridgeProtected;
+        stdout.writeln('$stateReplyPrefix${jsonEncode(reply)}');
+      }
       if (rgba case final pixels?) {
         pending = true;
         peer.add(pixels);
