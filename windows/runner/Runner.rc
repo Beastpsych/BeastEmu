@@ -95,7 +95,7 @@ BEGIN
             VALUE "InternalName", "beastemu" "\0"
             VALUE "LegalCopyright", "Copyright (c) 2026 Beast" "\0"
             VALUE "OriginalFilename", "beastemu.exe" "\0"
-            VALUE "ProductName", "BeastEmu GBA Dev" "\0"
+            VALUE "ProductName", "BeastEmu" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

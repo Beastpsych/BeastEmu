@@ -1,12 +1,10 @@
 # BeastEmu
 
-O candidato local integrado GB/GBC/GBA está descrito no [roteiro de avaliação e preservação de dados](docs/gba-candidato.md), com perfis isolados, pendências manuais e proposta de versão futura. O proprietário aprovou manualmente a GBA 04. Este candidato permanece em avaliação.
-
-**Branch de desenvolvimento GBA para Windows x64.** Para compilar, gerar o cartucho de demonstração e testar o mGBA com um perfil separado, siga o [guia do marco experimental](docs/gba-dev.md). A descrição da beta GB/GBC aparece abaixo.
+O candidato local **0.2.0-beta.1+4** integra GB, GBC e GBA. O roteiro de atualização e de importação opcional está no [guia da beta 0.2](docs/beta-0.2.md). A beta pública anterior permanece em [v0.1.1-beta.1](https://github.com/Beastpsych/BeastEmu/releases/tag/v0.1.1-beta.1).
 
 <img src="assets/brand/logo-horizontal.png" width="333" alt="BeastEmu · Beast Edition">
 
-Emulador de Game Boy e Game Boy Color para Windows x64, com interface Beast Edition em português e núcleo SameBoy Libretro. Primeira beta para Windows: **v0.1.1-beta.1**, build 3.
+Emulador de Game Boy, Game Boy Color e Game Boy Advance para Windows x64, com interface Beast Edition em português. GB/GBC usam SameBoy Libretro e GBA usa mGBA Libretro. A versão 0.2 está em preparação local.
 
 O BeastEmu organiza a biblioteca no próprio computador e reproduz áudio estéreo via XAudio2. Cada pessoa importa os cartuchos aos quais tem acesso legítimo. A distribuição não inclui jogos ou ROMs comerciais.
 
@@ -17,7 +15,7 @@ O BeastEmu organiza a biblioteca no próprio computador e reproduz áudio estér
 ## Instalar e jogar
 
 1. Em Windows 10 ou 11 x64, execute o instalador BeastEmu. Ele cria um atalho no menu Iniciar e oferece um atalho na área de trabalho. Para usar o portátil, extraia o ZIP inteiro e abra `beastemu.exe`. Se solicitado, instale o Visual C++ v14 Redistributable x64 da Microsoft. [Guia de instalação e atualização](docs/windows-instalador.md)
-2. Em **Biblioteca → Adicionar jogos GB/GBC**, escolha seus arquivos próprios `.gb` ou `.gbc` descompactados. O aplicativo guarda uma cópia privada. Use os filtros GB/GBC, a estrela de favoritos e a lista de recentes para encontrar o jogo. As capas são imagens locais escolhidas por você.
+2. Em **Biblioteca → Adicionar jogos GB/GBC/GBA**, escolha arquivos próprios `.gb`, `.gbc` ou `.gba` descompactados. O aplicativo guarda uma cópia privada. Use os filtros por console, favoritos e recentes. As capas são imagens locais escolhidas por você. No GBA, Q/E acionam L/R quando livres de outros mapeamentos, e LB/RB atuam no XInput.
 3. Selecione **Jogar**. Por padrão, setas ou WASD movem o direcional, X corresponde a A, Z a B, Enter a Start e Shift a Select. Em **Configurações**, ajuste teclado, gamepad Xbox/XInput, volume, escala e filtragem.
 4. Ao terminar, use **Sair** e aguarde o encerramento da sessão para concluir a gravação.
 
@@ -35,6 +33,8 @@ Altere essas teclas em **Configurações → Atalhos do emulador**. A aceleraç�
 
 ## Guardar progresso
 
+GBA usa cartuchos EEPROM, SRAM ou Flash. As funções específicas de relógio de jogos GBA ainda exigem validação por título. Os dados mGBA ficam em subdiretórios próprios e o procedimento opcional de importação do GBA Dev está no [guia 0.2](docs/beta-0.2.md).
+
 Salvar pelo menu do próprio jogo grava os dados de cartucho, incluindo o relógio RTC quando disponível. Use esse recurso para continuar normalmente após reabrir. **Salvar estado** e **Carregar estado** oferecem cinco instantâneos por ROM. A interface confirma a substituição de um slot ocupado. Após restaurar um estado, guarde o progresso dessa sessão nos slots. Reabrir uma sessão normal retoma o save de cartucho protegido. [Pastas de dados e backup](docs/windows-instalador.md#atualizar-e-desinstalar)
 
 ## Dois jogadores no mesmo computador
@@ -42,6 +42,8 @@ Salvar pelo menu do próprio jogo grava os dados de cartucho, incluindo o relóg
 Abra **Biblioteca → Link Cable Local**, selecione as duas ROMs e escolha **Conectar**. J1 fica à esquerda e usa o teclado. Com um gamepad XInput ele pertence a J2. Com dois controles, o primeiro opera J1 e o segundo J2. O áudio vem de J1. O modo experimental conserva saves separados por ROM e posição. Mantenha a mesma posição na sessão seguinte. Save states e aceleração estão disponíveis no modo individual. A comunicação serial tem teste com ROMs sintéticas. A troca real de Pokémon ainda precisa de validação. [Roteiro da demonstração](docs/windows-portatil.md#conferir-o-link-cable-local)
 
 ## Compilar no Windows
+
+GBA requer também `cores/windows/mgba_libretro.dll`, revisão `7a12d6d4b9acb14c0ae62c9166b6a2f3d08007f6`, SHA-256 `AAD5891C91611C226A864E3D308E791038C862CA7E3A06491E6AA2B11BBC792F`. [Fontes e avisos mGBA](docs/mGBA-fontes.md). As imagens abaixo e acima registram a interface da beta 0.1.
 
 Use Flutter 3.47.9 (Dart 3.13.7), Visual Studio com a carga **Desenvolvimento para desktop com C++** e Windows SDK. Rode os comandos na raiz do repositório.
 

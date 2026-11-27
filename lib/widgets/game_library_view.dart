@@ -211,28 +211,6 @@ class _GameLibraryViewState extends State<GameLibraryView> {
 
   Future<void> _play(GameEntry game) async {
     if (!await _available(game) || !mounted) return;
-    if (coreForPath(game.localPath) == CartridgeCore.mgba) {
-      final proceed = await showDialog<bool>(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Game Boy Advance · Experimental'),
-          content: const Text(
-            'Use uma ROM sintética ou homebrew de teste. Salve pelo menu do próprio jogo e aguarde o encerramento da sessão.',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: const Text('Cancelar'),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.pop(context, true),
-              child: const Text('Iniciar teste'),
-            ),
-          ],
-        ),
-      );
-      if (proceed != true || !mounted) return;
-    }
     await showDialog<void>(
       context: context,
       barrierDismissible: false,

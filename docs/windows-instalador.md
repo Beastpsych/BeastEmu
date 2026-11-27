@@ -1,4 +1,8 @@
-# BeastEmu 0.1.1-beta.1 · build 3 para Windows x64
+# BeastEmu 0.2.0-beta.1 · build 4 para Windows x64
+
+Esta versão integra GB/GBC/GBA e usa o AppId público original, com versão numérica `0.2.0.4`. A atualização pública mantém os perfis e os formatos GB/GBC. Dados GBA ficam nos subdiretórios `saves/mgba` e `states/mgba` por SHA-256. A importação do GBA Dev é opcional e manual. Consulte [o roteiro 0.2](beta-0.2.md) antes de atualizar dados reais.
+
+## Orientações e registro da beta 0.1.1
 
 Esta beta local inclui emulação de Game Boy e Game Boy Color. O modo de um jogador é o padrão. **Link Cable Local** é experimental e usa saves separados para cada jogador.
 

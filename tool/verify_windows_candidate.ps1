@@ -29,7 +29,7 @@ $payload = @(Get-Content -LiteralPath (Join-Path $root 'payload.json') -Raw | Co
 foreach ($required in @('helpers\sameboy-live.exe','helpers\mgba-live.exe','cores\windows\sameboy_libretro.dll','cores\windows\mgba_libretro.dll','LICENSE','MARCA.md','licenses\mGBA-FONTES.md')) {
     if ($required -notin $payload.path) { throw "Instalador sem $required" }
 }
-if ($exe[0].VersionInfo.ProductVersion.Trim() -cne '0.1.1-beta.1+3') { throw 'Versão inesperada do candidato.' }
+if ($exe[0].VersionInfo.ProductVersion.Trim() -cne '0.2.0-beta.1+4') { throw 'Versão inesperada do candidato.' }
 Write-Output "Integridade confirmada: $($manifest.Count) arquivos no ZIP e $($payload.Count) no manifesto do instalador."
 Write-Output "Assinatura do instalador: $((Get-AuthenticodeSignature -LiteralPath $exe[0].FullName).Status)"
 Write-Output 'Instalação, atualização e desinstalação permanecem sujeitas a teste em conta descartável.'

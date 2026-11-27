@@ -16,7 +16,9 @@ function Read-Setting([string]$Path, [string]$Pattern) {
     $match.Groups[1].Value
 }
 $app = Read-Setting 'windows/runner/Runner.rc' 'VALUE "ProductName", "([A-Za-z0-9 _-]+)"'
-if ($app -cne 'BeastEmu GBA Dev') { throw 'Este empacotador requer o perfil isolado BeastEmu GBA Dev.' }
+if ($app -cne 'BeastEmu') { throw 'Este empacotador requer o perfil público BeastEmu.' }
+$publicId = Read-Setting 'windows/installer/beastemu.iss' '(?m)^AppId=\{\{([^}]+)\}'
+if ($publicId -cne 'EA0278D8-06C3-4CE8-9AC3-0219910142EE') { throw 'AppId diferente da instalação pública 0.1.1.' }
 $exe = (Read-Setting 'windows/CMakeLists.txt' 'set\(BINARY_NAME "([A-Za-z0-9_-]+)"\)') + '.exe'
 $version = Read-Setting 'pubspec.yaml' '(?m)^version:\s*([A-Za-z0-9.+-]+)\s*$'
 $vi = (Get-Item -LiteralPath (Join-Path $bundle $exe)).VersionInfo
@@ -31,7 +33,7 @@ $vc = [version](Read-Setting 'build/windows/x64/CMakeCache.txt' '(?im)^CMAKE_LIN
 $runtime = @(
     $exe, 'beastemu_audio.dll', 'flutter_windows.dll', 'dartjni.dll',
     'helpers\mgba-live.exe', 'cores\windows\mgba_libretro.dll',
-    'GBA-DEV.md', 'AVALIACAO.md', 'licenses\mGBA.txt', 'licenses\mGBA-inih.txt', 'licenses\mGBA-FONTES.md',
+    'GBA-DEV.md', 'BETA-0.2.md', 'AVALIACAO.md', 'licenses\mGBA.txt', 'licenses\mGBA-inih.txt', 'licenses\mGBA-FONTES.md',
     'helpers\sameboy-live.exe', 'helpers\sameboy-preview.exe', 'cores\windows\sameboy_libretro.dll',
     'data\app.so', 'data\icudtl.dat', 'data\flutter_assets\AssetManifest.bin',
     'data\flutter_assets\FontManifest.json', 'data\flutter_assets\NativeAssetsManifest.json',
@@ -59,7 +61,7 @@ foreach ($notice in 'LICENSE', 'MARCA.md') {
 $files = [ordered]@{}
 foreach ($path in $runtime) { $files[$path] = Join-Path $bundle $path }
 $files['icons\beastemu-dragon.ico'] = Join-Path $repo 'windows/runner/resources/app_icon.ico'
-$files['INSTALACAO.md'] = Join-Path $repo 'docs/gba-candidato.md'
+$files['INSTALACAO.md'] = Join-Path $repo 'docs/windows-instalador.md'
 $files['licenses\InnoSetup.txt'] = Join-Path $compilerDir 'license.txt'
 
 $output = Join-Path $repo ("build/installer/" + $version + "/" + [guid]::NewGuid().ToString('N'))

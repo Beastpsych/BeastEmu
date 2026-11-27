@@ -13,10 +13,6 @@ Future<void> initializeWindowsProfile() async {
   // path_provider resolves the Windows Known Folder, including redirection,
   // and appends CompanyName/ProductName from the executable's resources.
   final current = await getApplicationSupportDirectory();
-  if (current.uri.pathSegments.contains('BeastEmu GBA Dev')) {
-    _dataDirectory = current;
-    return;
-  }
   final legacy = Directory(
     '${current.parent.parent.path}/com.example/beastemu',
   );

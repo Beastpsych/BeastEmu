@@ -1,5 +1,7 @@
 # BeastEmu GB/GBC/GBA · candidato local de desenvolvimento
 
+Registro histórico da GBA 05. A preparação pública seguinte está no [guia da beta 0.2](beta-0.2.md), com identidade e caminhos públicos próprios.
+
 Este candidato integra SameBoy para GB/GBC e mGBA para GBA no Windows x64. O proprietário aprovou manualmente a GBA 04. A compatibilidade de jogos comerciais específicos depende dos resultados registrados pelo avaliador. Versão técnica preservada `0.1.1-beta.1+3`. Proposta para futura inclusão pública de GBA `0.2.0-beta.1`, sujeita à autorização do proprietário.
 
 Abra `beastemu.exe` mantendo toda a pasta. O instalador usa o nome **BeastEmu GBA Dev**, AppId `{04248C8D-1988-4CC3-A2EC-83D97B4A7A35}` e `%LOCALAPPDATA%\Programs\BeastEmu GBA Dev`. Os atalhos possuem esse nome. O instalador requer Visual C++ v14 x64 e permanece sem assinatura Authenticode. A validação de instalação e desinstalação deste candidato deve ocorrer em uma conta Windows descartável.

@@ -1,5 +1,7 @@
 # Game Boy Advance experimental · Windows x64
 
+Este documento registra as etapas GBA 01–05 e os caminhos exclusivos do desenvolvimento. Para o candidato público 0.2, siga `BETA-0.2.md` no pacote ou [o guia público](beta-0.2.md) nos fontes. O aplicativo público usa os caminhos públicos ali indicados.
+
 Este build local usa um perfil de desenvolvimento. Importe somente cartuchos sintéticos ou homebrew de teste. Para guardar o progresso, use o menu interno de um jogo com memória de cartucho e aguarde o fechamento da sessão. A sessão individual mantém o teclado configurado e aceita direcional, A, B, Start e Select. Q e E acionam L e R quando livres de outros mapeamentos. No controle XInput, use LB e RB. A janela preserva a proporção, permite ajustar volume ou mudo e encerra o auxiliar ao sair.
 
 ## Testar o marco

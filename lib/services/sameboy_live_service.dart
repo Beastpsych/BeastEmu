@@ -161,7 +161,9 @@ class SameBoyLiveService {
         environment: {
           if ((profileRoot?.path ?? Platform.environment['LOCALAPPDATA'])
               case final local?)
-            'LOCALAPPDATA': '$local/BeastEmu-GBA-Dev',
+            'LOCALAPPDATA': profileRoot == null
+                ? local
+                : '$local/BeastEmu-GBA-Dev',
           sameBoyCommandEnvironment: partner == null ? '1' : '0',
           expectedRomEnvironment: expectedRomHash ?? '',
           sameBoyVolumeEnvironment: launchVolume.toString(),

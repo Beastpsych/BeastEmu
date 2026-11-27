@@ -1,4 +1,8 @@
-# BeastEmu 0.1.1-beta.1 · build 3 para Windows x64
+# BeastEmu 0.2.0-beta.1 · build 4 para Windows x64
+
+O pacote atual inclui SameBoy para GB/GBC e mGBA para GBA. Ambos usam o perfil público BeastEmu. Os dados GBA ficam em `%LOCALAPPDATA%\BeastEmu\saves\mgba` e `states\mgba`, por SHA-256 da ROM. Siga `BETA-0.2.md` para atualização e importação opcional do GBA Dev. Consulte `licenses/mGBA-FONTES.md` para obter os fontes da revisão mGBA. A instalação GBA Dev permanece separada.
+
+## Orientações e registro da beta 0.1.1
 
 Abra `beastemu.exe` dentro da pasta completa. O Windows precisa do runtime Microsoft Visual C++ v14 x64 e do XAudio2 do sistema. Os auxiliares em `helpers` incluem o runtime Dart. Para iniciar uma sessão, selecione **Jogar** no card da biblioteca.
 

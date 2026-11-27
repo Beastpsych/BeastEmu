@@ -673,7 +673,7 @@ class _SameBoyLiveDialogState extends State<SameBoyLiveDialog> {
                     _toolbar(),
                     if (_gba)
                       Text(
-                        'GBA experimental · ${_service.gbaSaveStatus} · L/R: Q/E ou LB/RB',
+                        'GBA · ${_service.gbaSaveStatus} · L/R: Q/E ou LB/RB',
                         textAlign: TextAlign.center,
                       ),
                     if (widget.partner case final partner?)

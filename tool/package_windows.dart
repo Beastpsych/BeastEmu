@@ -58,8 +58,9 @@ Future<void> main() async {
   await copy('docs/mGBA-LICENSE.txt', 'licenses/mGBA.txt');
   await copy('docs/mGBA-inih.txt', 'licenses/mGBA-inih.txt');
   await copy('docs/gba-dev.md', 'GBA-DEV.md');
-  await copy('docs/gba-candidato.md', 'AVALIACAO.md');
-  await copy('docs/gba-candidato.md', 'LEIA-ME.md');
+  await copy('docs/beta-0.2.md', 'BETA-0.2.md');
+  await copy('docs/beta-0.2.md', 'AVALIACAO.md');
+  await copy('docs/windows-portatil.md', 'LEIA-ME.md');
   await copy('docs/mGBA-fontes.md', 'licenses/mGBA-FONTES.md');
   await copy('LICENSE', 'LICENSE');
   await copy('MARCA.md', 'MARCA.md');
@@ -113,7 +114,7 @@ Future<void> main() async {
     }
   }
   final folder = await stage.rename(
-    '${parent.path}/BeastEmu-GBA-Dev-Windows-x64-${DateTime.now().microsecondsSinceEpoch}',
+    '${parent.path}/BeastEmu-0.2.0-beta.1-Windows-x64-${DateTime.now().microsecondsSinceEpoch}',
   );
   stdout.writeln(folder.absolute.path);
 }
