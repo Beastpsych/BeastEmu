@@ -10,6 +10,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:beastemu/models/game_entry.dart';
 import 'package:beastemu/services/game_boy_header.dart';
 
+import 'gba_cartridge.dart';
+
 class ImportSummary {
   const ImportSummary({
     required this.games,
@@ -94,31 +96,31 @@ class GameLibraryService {
     for (final file in files) {
       final fileName = file.name.trim();
       final lowerName = fileName.toLowerCase();
-      final extension = lowerName.endsWith('.gbc')
-          ? '.gbc'
-          : lowerName.endsWith('.gb')
-          ? '.gb'
-          : null;
-
-      if (extension == null) {
+      final core = coreForPath(lowerName);
+      final gba = core == CartridgeCore.mgba;
+      final minSize = gba ? 0xc0 : 0x150;
+      if (core == null) {
         skipped++;
         continue;
       }
 
+      final extension = lowerName.substring(lowerName.lastIndexOf('.'));
       try {
         final fileSize = file.lengthSync() ?? await file.length();
-        if (fileSize != null && (fileSize < 0x150 || fileSize > _maxRomBytes)) {
+        if (fileSize != null &&
+            (fileSize < minSize || fileSize > _maxRomBytes)) {
           skipped++;
           continue;
         }
 
         final bytes = await file.readAsBytes();
-        if (bytes.length < 0x150 || bytes.length > _maxRomBytes) {
+        if (bytes.length < minSize || bytes.length > _maxRomBytes) {
           skipped++;
           continue;
         }
 
-        final cartridge = GameBoyHeaderReader.fromBytes(bytes);
+        final cartridge = gba ? null : GameBoyHeaderReader.fromBytes(bytes);
+        final headerTitle = cartridge?.title ?? gbaTitle(bytes);
         final hash = sha256.convert(bytes).toString();
         if (knownHashes.contains(hash)) {
           duplicates++;
@@ -135,9 +137,9 @@ class GameLibraryService {
             .substring(0, fileName.length - extension.length)
             .replaceAll('_', ' ')
             .trim();
-        final title = cartridge.title == 'Sem titulo'
+        final title = headerTitle == 'Sem titulo'
             ? (fallbackTitle.isEmpty ? 'Jogo sem título' : fallbackTitle)
-            : cartridge.title;
+            : headerTitle;
 
         games.add(
           GameEntry(
@@ -145,7 +147,7 @@ class GameLibraryService {
             title: title,
             originalName: fileName,
             localPath: destination.path,
-            console: cartridge.libraryConsole,
+            console: cartridge?.libraryConsole ?? 'Game Boy Advance',
             romHash: hash,
           ),
         );
@@ -187,12 +189,15 @@ class GameLibraryService {
     if (await File(game.localPath).exists()) {
       throw StateError('A cópia atual está disponível.');
     }
+    final minSize = coreForPath(game.originalName) == CartridgeCore.mgba
+        ? 0xc0
+        : 0x150;
     final length = await source.length();
-    if (length != null && (length < 0x150 || length > _maxRomBytes)) {
+    if (length != null && (length < minSize || length > _maxRomBytes)) {
       throw const FormatException('Tamanho de ROM inválido.');
     }
     final bytes = await source.readAsBytes();
-    if (bytes.length < 0x150 || bytes.length > _maxRomBytes) {
+    if (bytes.length < minSize || bytes.length > _maxRomBytes) {
       throw const FormatException('Tamanho de ROM inválido.');
     }
     final hash = sha256.convert(bytes).toString();
@@ -210,9 +215,9 @@ class GameLibraryService {
     }
     final root = await _romDirectory();
     final folder = await root.createTemp('recovered-');
-    final file = File(
-      '${folder.path}/game.${game.originalName.toLowerCase().endsWith(".gbc") ? "gbc" : "gb"}',
-    );
+    final extension = game.originalName.toLowerCase().split('.').last;
+    final suffix = const {'gb', 'gbc', 'gba'}.contains(extension) ? extension : 'gb';
+    final file = File('${folder.path}/game.$suffix');
     try {
       await file.writeAsBytes(bytes, flush: true);
       return await updateEntry(

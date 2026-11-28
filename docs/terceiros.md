@@ -4,6 +4,7 @@ Este inventário acompanha o instalador e o portátil. Os nomes de arquivo abaix
 
 | Componente distribuído | Origem e condições | Aviso incluído |
 |---|---|---|
+| mGBA Libretro 0.11-212-7a12d6d | Jeffrey Pfau, MPL 2.0. DLL sem alterações locais, revisão fixa `7a12d6d4b9acb14c0ae62c9166b6a2f3d08007f6`. Os fontes cobertos são disponibilizados gratuitamente com identificação da revisão. inih conserva BSD de três cláusulas. | `mGBA.txt`, `mGBA-inih.txt`, `mGBA-FONTES.md` com endereço dos fontes |
 | SameBoy 1.0.5, revisão `90e2899` | Lior Halphon, Expat. Conservar copyright, permissão e isenção de garantia. O alvo usa o núcleo, o adaptador Libretro e os programas de inicialização do SameBoy. A condição adicional de iOS refere-se ao diretório iOS. | `SameBoy.txt` |
 | Cabeçalhos Libretro | The RetroArch team, licença MIT dos arquivos `libretro.h` e `retro_inline.h`. As definições `hardware.inc` usadas na montagem do boot do SameBoy são CC0-1.0. | `Libretro.txt` |
 | Flutter 3.47.9, engine Windows, runtime Dart 3.13.7 | Licenças BSD com condições de atribuição, além dos avisos próprios dos componentes incorporados, como ICU e Skia. Preservar os avisos integrais no binário distribuído e nas cópias do código correspondente. | `Flutter.txt`, `Flutter-Windows.md`, `Flutter-Engine.txt`, `Dart.txt` |

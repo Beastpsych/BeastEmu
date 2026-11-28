@@ -6,13 +6,25 @@ export 'keyboard_bindings.dart' show GameBoyButton, KeyboardBindings;
 
 /// Combines keyboard aliases and logical buttons into Libretro joypad state.
 class GameBoyInputController extends ChangeNotifier {
-  GameBoyInputController({KeyboardBindings? bindings})
+  GameBoyInputController({KeyboardBindings? bindings, this.gba = false})
     : _bindings = bindings ?? KeyboardBindings(),
       _ownsBindings = bindings == null {
     _bindings.addListener(_resetKeyboard);
   }
   final KeyboardBindings _bindings;
   final bool _ownsBindings;
+  final bool gba;
+  int _padShoulders = 0;
+  int _shoulder(LogicalKeyboardKey key) {
+    if (!gba ||
+        _bindings.buttonFor(key) != null ||
+        _bindings.actionFor(key) != null) {
+      return 0;
+    }
+    if (key == LogicalKeyboardKey.keyQ) return 1 << 10;
+    if (key == LogicalKeyboardKey.keyE) return 1 << 11;
+    return 0;
+  }
 
   static const Map<int, GameBoyButton> _libretroMap = {
     0: GameBoyButton.b,
@@ -37,7 +49,7 @@ class GameBoyInputController extends ChangeNotifier {
 
   bool handleKeyEvent(KeyEvent event) {
     final key = event.logicalKey;
-    if (_bindings.buttonFor(key) == null) return false;
+    if (_bindings.buttonFor(key) == null && _shoulder(key) == 0) return false;
     if (event is KeyUpEvent) {
       keyUp(key);
     } else if (KeyboardBindings.shortcutModifierPressed) {
@@ -49,30 +61,41 @@ class GameBoyInputController extends ChangeNotifier {
   }
 
   void keyDown(LogicalKeyboardKey key) {
-    if (_bindings.buttonFor(key) == null || _heldKeys.contains(key)) return;
-    final before = pressedButtons;
+    if ((_bindings.buttonFor(key) == null && _shoulder(key) == 0) ||
+        _heldKeys.contains(key)) {
+      return;
+    }
+    final before = joypadMask;
     _heldKeys.add(key);
-    if (!setEquals(before, pressedButtons)) notifyListeners();
+    if (before != joypadMask) notifyListeners();
   }
 
   void keyUp(LogicalKeyboardKey key) {
     if (!_heldKeys.contains(key)) return;
-    final before = pressedButtons;
+    final before = joypadMask;
     _heldKeys.remove(key);
-    if (!setEquals(before, pressedButtons)) notifyListeners();
+    if (before != joypadMask) notifyListeners();
   }
 
   /// Replaces the player's gamepad state while preserving held keys.
-  void setDeviceButtons(Set<GameBoyButton> buttons) {
-    if (setEquals(buttons, _deviceButtons)) return;
-    final before = pressedButtons;
+  void setDeviceButtons(Set<GameBoyButton> buttons, {int shoulders = 0}) {
+    if (setEquals(buttons, _deviceButtons) && shoulders == _padShoulders) {
+      return;
+    }
+    final before = joypadMask;
+    _padShoulders = gba ? shoulders : 0;
     _deviceButtons = {...buttons};
-    if (!setEquals(before, pressedButtons)) notifyListeners();
+    if (before != joypadMask) notifyListeners();
   }
 
   int get joypadMask {
     final pressed = pressedButtons;
-    var mask = 0;
+    var mask = _padShoulders;
+    if (gba) {
+      for (final key in _heldKeys) {
+        mask |= _shoulder(key);
+      }
+    }
     for (final entry in _libretroMap.entries) {
       if (pressed.contains(entry.value)) mask |= 1 << entry.key;
     }
@@ -80,7 +103,7 @@ class GameBoyInputController extends ChangeNotifier {
   }
 
   int libretroState(int buttonId) =>
-      pressedButtons.contains(_libretroMap[buttonId]) ? 1 : 0;
+      buttonId >= 0 && buttonId < 16 ? (joypadMask >> buttonId) & 1 : 0;
 
   void _resetKeyboard() {
     if (_heldKeys.isEmpty) return;
@@ -89,8 +112,11 @@ class GameBoyInputController extends ChangeNotifier {
   }
 
   void reset() {
-    if (_heldKeys.isEmpty && _deviceButtons.isEmpty) return;
+    if (_heldKeys.isEmpty && _deviceButtons.isEmpty && _padShoulders == 0) {
+      return;
+    }
     _heldKeys.clear();
+    _padShoulders = 0;
     _deviceButtons.clear();
     notifyListeners();
   }

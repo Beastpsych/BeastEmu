@@ -79,6 +79,7 @@ Future<void> _open(
   _Session session, {
   Gamepads? pads,
   bool dual = false,
+  bool gba = false,
   EmulationSettings? settings,
 }) async {
   await tester.binding.setSurfaceSize(const Size(1100, 850));
@@ -96,7 +97,7 @@ Future<void> _open(
                 gamepads: pads,
                 settings: settings ?? EmulationSettings(),
                 bindings: KeyboardBindings(),
-                romPath: 'synthetic.gb',
+                romPath: gba ? 'synthetic.gba' : 'synthetic.gb',
                 partner: dual
                     ? (path: 'synthetic.gbc', title: 'Parceiro')
                     : null,
@@ -142,6 +143,73 @@ Future<void> _firstFrame(
 }
 
 void main() {
+  testWidgets(
+    'GBA salva slot, carrega em tela cheia e devolve foco ao teclado',
+    (tester) async {
+      final session = _Session();
+      await _open(tester, session, gba: true);
+      await _firstFrame(tester, session);
+      await tester.tap(find.text('Salvar estado'));
+      await _update(tester);
+      expect(find.text('Slot 5'), findsOneWidget);
+      await tester.tap(find.text('Slot 2'));
+      await _update(tester);
+      await tester.sendKeyEvent(LogicalKeyboardKey.f11);
+      await _update(tester);
+      await tester.tap(find.text('Carregar estado'));
+      await _update(tester);
+      await tester.tap(find.text('Slot 2'));
+      await _update(tester);
+      await tester.tap(find.text('Carregar'));
+      await _update(tester);
+      expect(find.textContaining('Cartucho protegido'), findsOneWidget);
+      final count = session.masks.length;
+      await tester.sendKeyEvent(LogicalKeyboardKey.keyX);
+      expect(session.masks.skip(count), [256, 0]);
+      await tester.tap(find.text('Sair'));
+      await _update(tester);
+    },
+  );
+  testWidgets(
+    'Sessão GBA oferece estados, preserva velocidade e reconhece L/R',
+    (tester) async {
+      final session = _Session();
+      await _open(tester, session, gba: true);
+      expect(
+        find.textContaining('Aguardando dados de cartucho'),
+        findsOneWidget,
+      );
+      expect(find.text('Salvar estado'), findsOneWidget);
+      expect(find.text('Carregar estado'), findsOneWidget);
+      expect(find.text('Acelerar'), findsOneWidget);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyQ);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.keyE);
+      expect(session.masks.last, (1 << 10) | (1 << 11));
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyE);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.keyQ);
+      expect(session.masks.last, 0);
+      await _firstFrame(tester, session);
+      await tester.sendKeyEvent(LogicalKeyboardKey.f5);
+      await tester.sendKeyEvent(LogicalKeyboardKey.f9);
+      await tester.sendKeyEvent(LogicalKeyboardKey.f8);
+      expect(session.commands, [quickSave, quickLoad]);
+      expect(session.speeds, [2]);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.tab);
+      await _update(tester);
+      expect(find.text('4×'), findsOneWidget);
+      await tester.sendKeyRepeatEvent(LogicalKeyboardKey.tab);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.tab);
+      expect(session.speeds, [2, 4, 2]);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.tab);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+      expect(session.speeds, [2, 4, 2, 4, 2]);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.tab);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.tap(find.byTooltip('Fechar'));
+      await _update(tester);
+      expect(session.stops, 1);
+    },
+  );
   TestWidgetsFlutterBinding.ensureInitialized();
   final messenger =
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;

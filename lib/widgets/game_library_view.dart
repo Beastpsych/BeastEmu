@@ -13,6 +13,7 @@ import 'package:beastemu/models/game_entry.dart';
 import 'package:beastemu/services/emulation_settings.dart';
 import 'package:beastemu/services/game_library_service.dart';
 import 'package:beastemu/widgets/sameboy_live_dialog.dart';
+import 'package:beastemu/services/gba_cartridge.dart';
 
 class GameLibraryView extends StatefulWidget {
   const GameLibraryView({
@@ -79,8 +80,8 @@ class _GameLibraryViewState extends State<GameLibraryView> {
     try {
       final files = await FilePicker.pickFiles(
         type: FileType.custom,
-        allowedExtensions: ['gb', 'gbc'],
-        dialogTitle: 'Selecionar jogos GB/GBC (.gb, .gbc)',
+        allowedExtensions: ['gb', 'gbc', 'gba'],
+        dialogTitle: 'Selecionar jogos GB/GBC/GBA (.gb, .gbc, .gba)',
       );
       if (files.isEmpty) return; // Janela cancelada.
 
@@ -192,7 +193,7 @@ class _GameLibraryViewState extends State<GameLibraryView> {
     try {
       final files = await FilePicker.pickFiles(
         type: FileType.custom,
-        allowedExtensions: ['gb', 'gbc'],
+        allowedExtensions: ['gb', 'gbc', 'gba'],
       );
       if (files.isEmpty) return false;
       final entries = await _service.recover(game, _games, files.single);
@@ -246,7 +247,11 @@ class _GameLibraryViewState extends State<GameLibraryView> {
                       value: selected[i],
                       hint: Text('Selecionar ROM do jogador ${i + 1}'),
                       items: [
-                        for (final game in _games)
+                        for (final game in _games.where(
+                          (g) =>
+                              coreForPath(g.originalName) ==
+                              CartridgeCore.sameBoy,
+                        ))
                           DropdownMenuItem(
                             value: game,
                             child: Text(
@@ -371,7 +376,12 @@ class _GameLibraryViewState extends State<GameLibraryView> {
         Wrap(
           spacing: 8,
           children: [
-            for (final console in <String?>[null, 'Game Boy', 'Game Boy Color'])
+            for (final console in <String?>[
+              null,
+              'Game Boy',
+              'Game Boy Color',
+              'Game Boy Advance',
+            ])
               ChoiceChip(
                 label: Text(console ?? 'Todos'),
                 selected: widget.consoleFilter == console,
@@ -408,10 +418,17 @@ class _GameLibraryViewState extends State<GameLibraryView> {
               onPressed: _loading || _busy ? null : _importGames,
               style: FilledButton.styleFrom(backgroundColor: beastRed),
               icon: const Icon(Icons.add),
-              label: const Text('Adicionar jogos GB/GBC'),
+              label: const Text('Adicionar jogos GB/GBC/GBA'),
             ),
             OutlinedButton.icon(
-              onPressed: _loading || _busy || _games.isEmpty
+              onPressed:
+                  _loading ||
+                      _busy ||
+                      !_games.any(
+                        (g) =>
+                            coreForPath(g.originalName) ==
+                            CartridgeCore.sameBoy,
+                      )
                   ? null
                   : _linkLocal,
               icon: const Icon(Icons.cable),
@@ -455,7 +472,7 @@ class _GameLibraryViewState extends State<GameLibraryView> {
                 ),
                 SizedBox(height: 8),
                 Text(
-                  'Adicione arquivos .gb ou .gbc que você tem permissão para usar.',
+                  'Adicione arquivos .gb, .gbc ou .gba que você tem permissão para usar.',
                   textAlign: TextAlign.center,
                   style: TextStyle(color: Colors.grey),
                 ),
@@ -544,7 +561,7 @@ class _GameLibraryViewState extends State<GameLibraryView> {
           ),
           const SizedBox(height: 5),
           Text(
-            '${game.console}  •  ${game.originalName.toLowerCase().endsWith('.gbc') ? '.gbc' : '.gb'}',
+            '${game.console}  •  .${game.originalName.split('.').last.toLowerCase()}',
             style: const TextStyle(color: Colors.grey, fontSize: 12),
           ),
           const SizedBox(height: 10),

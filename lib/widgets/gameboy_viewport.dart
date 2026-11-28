@@ -9,10 +9,12 @@ class GameBoyViewport extends StatelessWidget {
     required this.scale,
     required this.child,
     this.nativeWidth = 160,
+    this.nativeHeight = 144,
   });
 
   final int scale;
   final int nativeWidth;
+  final int nativeHeight;
   final Widget child;
 
   @override
@@ -23,13 +25,13 @@ class GameBoyViewport extends StatelessWidget {
         builder: (context, bounds) {
           final fit = math.min(
             bounds.maxWidth / nativeWidth,
-            bounds.maxHeight / 144,
+            bounds.maxHeight / nativeHeight,
           );
           final factor = scale == 0 ? fit : math.min(scale.toDouble(), fit);
           return Center(
             child: SizedBox(
               width: nativeWidth * factor,
-              height: 144 * factor,
+              height: nativeHeight * factor,
               child: child,
             ),
           );

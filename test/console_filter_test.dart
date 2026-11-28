@@ -155,6 +155,33 @@ void main() {
     expect(find.text('Zeta'), findsNothing);
     expect(library.games.length, 2);
   });
+  testWidgets('card GBA abre o filtro dedicado e exclui GB/GBC', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: BeastHome(
+          library: _Library(),
+          settings: EmulationSettings(),
+          bindings: KeyboardBindings(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(find.text('Game Boy Advance').hitTestable(), 160, scrollable: find.byType(Scrollable).last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Game Boy Advance'));
+    await tester.pumpAndSettle();
+    expect(
+      tester
+          .widget<GameLibraryView>(find.byType(GameLibraryView))
+          .consoleFilter,
+      'Game Boy Advance',
+    );
+    expect(find.text('Azul'), findsNothing);
+    expect(find.text('Cor'), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
   test('filtra plataformas e inclui cartuchos de modo duplo', () {
     GameEntry game(String c) => GameEntry(
       id: 'x',

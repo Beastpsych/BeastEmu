@@ -15,12 +15,15 @@ function Read-Setting([string]$Path, [string]$Pattern) {
     if (!$match.Success) { throw "Configuração ausente em $Path" }
     $match.Groups[1].Value
 }
-$app = Read-Setting 'lib/main.dart' "(?m)^\s*title:\s*'([A-Za-z0-9 _-]+)',"
+$app = Read-Setting 'windows/runner/Runner.rc' 'VALUE "ProductName", "([A-Za-z0-9 _-]+)"'
+if ($app -cne 'BeastEmu') { throw 'Este empacotador requer o perfil público BeastEmu.' }
+$publicId = Read-Setting 'windows/installer/beastemu.iss' '(?m)^AppId=\{\{([^}]+)\}'
+if ($publicId -cne 'EA0278D8-06C3-4CE8-9AC3-0219910142EE') { throw 'AppId diferente da instalação pública 0.1.1.' }
 $exe = (Read-Setting 'windows/CMakeLists.txt' 'set\(BINARY_NAME "([A-Za-z0-9_-]+)"\)') + '.exe'
 $version = Read-Setting 'pubspec.yaml' '(?m)^version:\s*([A-Za-z0-9.+-]+)\s*$'
 $vi = (Get-Item -LiteralPath (Join-Path $bundle $exe)).VersionInfo
 if ($vi.ProductVersion -cne $version) { throw "Release $($vi.ProductVersion) difere do pubspec $version." }
-if ($vi.CompanyName -cne 'BeastEmu' -or $vi.ProductName -cne $app -or $vi.FileDescription -cne $app) {
+if ($vi.CompanyName -cne 'BeastEmu' -or $vi.ProductName -cne $app -or $vi.FileDescription -cne 'BeastEmu') {
     throw 'A identidade do executável diverge do perfil de dados desta versão.'
 }
 $numeric = "$($vi.ProductMajorPart).$($vi.ProductMinorPart).$($vi.ProductBuildPart).$($vi.ProductPrivatePart)"
@@ -29,6 +32,8 @@ $vc = [version](Read-Setting 'build/windows/x64/CMakeCache.txt' '(?im)^CMAKE_LIN
 # Only these portable files are eligible. Review new assets or dependencies explicitly.
 $runtime = @(
     $exe, 'beastemu_audio.dll', 'flutter_windows.dll', 'dartjni.dll',
+    'helpers\mgba-live.exe', 'cores\windows\mgba_libretro.dll',
+    'GBA-DEV.md', 'BETA-0.2.md', 'validacao-final-0.2.md', 'AVALIACAO.md', 'licenses\mGBA.txt', 'licenses\mGBA-inih.txt', 'licenses\mGBA-FONTES.md',
     'helpers\sameboy-live.exe', 'helpers\sameboy-preview.exe', 'cores\windows\sameboy_libretro.dll',
     'data\app.so', 'data\icudtl.dat', 'data\flutter_assets\AssetManifest.bin',
     'data\flutter_assets\FontManifest.json', 'data\flutter_assets\NativeAssetsManifest.json',

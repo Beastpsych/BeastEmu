@@ -1,5 +1,15 @@
 # Histórico do BeastEmu
 
+## 0.2.0-beta.1 · build 4 · candidato local
+
+- Integra GB/GBC com SameBoy e GBA com mGBA Libretro.
+- Acrescenta salvamento de cartucho EEPROM/SRAM/Flash GBA, cinco slots e estado rápido por ROM.
+- Oferece áudio estéreo, L/R por teclado e XInput, aceleração 1×–4×, atalhos configuráveis e tela cheia no GBA.
+- Preserva a biblioteca e os formatos de saves e estados GB/GBC da beta 0.1.1.
+- Mantém o AppId público e a pasta de instalação. GBA Dev continua com identidade própria.
+- Inclui avisos MPL 2.0 e identificação dos fontes do mGBA, roteiro de atualização e importação manual opcional com backup e validação.
+- O proprietário confirmou dez testes manuais, incluindo FireRed, Emerald e testes externos. O ciclo específico de upgrade público, desinstalação e reinstalação permanece pendente em ambiente descartável. Link Cable Local continua experimental e exclusivo de GB/GBC.
+
 ## 0.1.1-beta.1 · build 3
 
 Primeira beta preparada para distribuição em Windows x64. O executável e o instalador usam a versão de produto `0.1.1-beta.1+3` e o recurso numérico `0.1.1.3`.

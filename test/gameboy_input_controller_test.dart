@@ -3,6 +3,25 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('Q/E e LB/RB compõem os bits L/R só no GBA', () {
+    final gba = GameBoyInputController(gba: true);
+    final gb = GameBoyInputController();
+    addTearDown(gba.dispose);
+    addTearDown(gb.dispose);
+    gba.keyDown(LogicalKeyboardKey.keyQ);
+    gba.keyDown(LogicalKeyboardKey.keyE);
+    gba.setDeviceButtons({GameBoyButton.a}, shoulders: 1 << 10);
+    expect(gba.joypadMask, (1 << 10) | (1 << 11) | (1 << 8));
+    gba.keyUp(LogicalKeyboardKey.keyQ);
+    expect(gba.libretroState(10), 1);
+    gba.setDeviceButtons({});
+    expect(gba.joypadMask, 1 << 11);
+    gba.reset();
+    expect(gba.joypadMask, 0);
+    gb.keyDown(LogicalKeyboardKey.keyQ);
+    gb.setDeviceButtons({}, shoulders: 1 << 11);
+    expect(gb.joypadMask, 0);
+  });
   late GameBoyInputController input;
 
   setUp(() => input = GameBoyInputController());
